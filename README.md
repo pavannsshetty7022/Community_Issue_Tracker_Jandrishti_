@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # JanDrishti - Public Grievance Management System
 
 ## Project Overview
@@ -106,3 +107,6 @@ JanDrishti is a comprehensive Public Grievance Management System designed to fac
 
 ## License
 MIT License
+=======
+# My-projects
+>>>>>>> bb2f66964579fd31769db70f493d3ec318beced7
