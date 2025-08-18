@@ -1,46 +1,36 @@
-JanDrishti - Public Grievance Management System 🗳️
-Project Overview
+## JanDrishti - Public Grievance Management System 🗳️
+
+##Project Overview
 JanDrishti is a comprehensive Public Grievance Management System designed to facilitate communication between citizens and authorities. The platform enables users to report issues, track their status, and receive updates on resolution progress.
-Features
-User Registration and Authentication
+## Features
+-User Registration and Authentication
+-Issue Reporting with Media Upload
+-Real-time Status Updates
+-Admin Dashboard
+-Issue Tracking System
+-Profile Management
 
-Issue Reporting with Media Upload
-
-Real-time Status Updates
-
-Admin Dashboard
-
-Issue Tracking System
-
-Profile Management
-
-Tech Stack
+## Tech Stack
 Frontend: React.js
-
 Backend: Node.js, Express.js
-
 Database: MySQL
-
 Real-time Updates: Socket.IO
 
-Setup Instructions
+## Setup Instructions
 Prerequisites
 Node.js (v14 or higher)
-
 MySQL Server
-
 npm or yarn
 
-Backend Setup
-Navigate to the backend directory:
-
+## Backend Setup
+1. Navigate to the backend directory:
 cd jan-drishti/backend
-
 
 2.  Install dependencies:
     ```bash
-npm install
-Create a .env file with the following variables:
+    npm install
+
+3. Create a .env file with the following variables:
 
 PORT=5000
 DB_HOST=your_database_host
@@ -53,11 +43,10 @@ JWT_SECRET=your_jwt_secret
 4.  Start the server:
     ```bash
 npm start
-User Frontend Setup
-Navigate to the user frontend directory:
 
+## User Frontend Setup
+1. Navigate to the user frontend directory:
 cd frontend-user
-
 
 2.  Install dependencies:
     ```bash
@@ -102,15 +91,3 @@ This project is licensed under the MIT License.
 
 
 
-
-
-
-
-
-
-
-
-
-Tools
-
-Gemini
