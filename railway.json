@@ -5,5 +5,5 @@
     "deploy": {
         "startCommand": "npm start"
     },
-    "source": "jan-drishti/backend"
+    "rootDirectory": "jan-drishti/backend"
 }
