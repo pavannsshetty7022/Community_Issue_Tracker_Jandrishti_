@@ -7,6 +7,7 @@ import AdminDashboard from './pages/Admin/AdminDashboard';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
+import useDocumentTitle from './utils/useDocumentTitle';
 
 const theme = createTheme({
   palette: {
@@ -42,22 +43,30 @@ const AdminPrivateRoute = ({ children }) => {
   return admin ? children : <Navigate to="/login" replace />;
 };
 
+const AppContent = () => {
+  useDocumentTitle();
+
+  return (
+    <Routes>
+      <Route path="/login" element={<AdminLogin />} />
+      <Route path="/dashboard" element={
+        <AdminPrivateRoute>
+          <AdminDashboard />
+        </AdminPrivateRoute>
+      } />
+      {}
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+};
+
 function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <Router>
         <AdminAuthProvider>
-          <Routes>
-            <Route path="/login" element={<AdminLogin />} />
-            <Route path="/dashboard" element={
-              <AdminPrivateRoute>
-                <AdminDashboard />
-              </AdminPrivateRoute>
-            } />
-            {}
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
+          <AppContent />
         </AdminAuthProvider>
       </Router>
     </ThemeProvider>

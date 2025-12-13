@@ -11,6 +11,7 @@ import ReportIssue from './pages/User/ReportIssue';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
+import useDocumentTitle from './utils/useDocumentTitle';
 
 const theme = createTheme({
   palette: {
@@ -45,6 +46,45 @@ const theme = createTheme({
     },
   },
 });
+
+const AppContent = () => {
+  useDocumentTitle();
+
+  return (
+    <Routes>
+      <Route path="/" element={<FlashScreen />} />
+      <Route path="/home" element={<Home />} />
+      <Route path="/register" element={<Register />} />
+      <Route path="/login" element={<Login />} />
+
+      <Route path="/profile-update" element={
+        <PrivateRoute>
+          <ProfileUpdate />
+        </PrivateRoute>
+      } />
+
+      <Route path="/dashboard" element={
+        <ProfileRequiredRoute>
+          <UserDashboard />
+        </ProfileRequiredRoute>
+      } />
+
+      <Route path="/report-issue" element={
+        <ProfileRequiredRoute>
+          <ReportIssue />
+        </ProfileRequiredRoute>
+      } />
+
+      <Route path="/edit-issue/:id" element={
+        <ProfileRequiredRoute>
+          <ReportIssue />
+        </ProfileRequiredRoute>
+      } />
+
+      <Route path="*" element={<Navigate to="/home" replace />} />
+    </Routes>
+  );
+};
 
 const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -89,38 +129,7 @@ function App() {
       <CssBaseline />
       <Router>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<FlashScreen />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/login" element={<Login />} />
-
-            <Route path="/profile-update" element={
-              <PrivateRoute>
-                <ProfileUpdate />
-              </PrivateRoute>
-            } />
-
-            <Route path="/dashboard" element={
-              <ProfileRequiredRoute>
-                <UserDashboard />
-              </ProfileRequiredRoute>
-            } />
-
-            <Route path="/report-issue" element={
-              <ProfileRequiredRoute>
-                <ReportIssue />
-              </ProfileRequiredRoute>
-            } />
-
-            <Route path="/edit-issue/:id" element={
-              <ProfileRequiredRoute>
-                <ReportIssue />
-              </ProfileRequiredRoute>
-            } />
-
-            <Route path="*" element={<Navigate to="/home" replace />} />
-          </Routes>
+          <AppContent />
         </AuthProvider>
       </Router>
     </ThemeProvider>
