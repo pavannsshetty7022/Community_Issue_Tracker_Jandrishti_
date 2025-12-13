@@ -1,9 +1,8 @@
 {
-    "build": {
-        "builder": "RAILPACK",
-        "context": "jan-drishti/backend"
-    },
-    "deploy": {
-        "runtime": "V2"
-    }
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "npm start"
+  }
 }
