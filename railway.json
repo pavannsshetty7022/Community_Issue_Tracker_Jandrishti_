@@ -1,0 +1,9 @@
+{
+    "build": {
+        "builder": "NIXPACKS",
+        "context": "jan-drishti/backend"
+    },
+    "deploy": {
+        "startCommand": "npm start"
+    }
+}
