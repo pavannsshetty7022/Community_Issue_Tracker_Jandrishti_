@@ -121,40 +121,19 @@ The setup process is the same for both the `frontend-user` and `frontend-admin` 
 
 4.  **Start the development server:**
     ```bash
-    npm start
-    ```
-    - The user frontend will be accessible at `http://localhost:3000`.
-    - The admin frontend will be accessible at `http://localhost:3001` (or another available port).
+npm start
+Project Structure
+├── frontend-admin/      # Admin dashboard interface
+├── frontend-user/       # User interface for citizens
+└── jan-drishti/         # Backend server
+    └── backend/
+Default Admin Credentials
+Username: admin
 
----
+Password: admin123
 
-## 📂 Project Structure
-
-The project uses a monorepo structure to keep the frontend and backend codebases separate but organized.
-
-```
-Community_Issue_Tracker_Jandrishti_/
-├── 📂 frontend-admin/      # React app for the Admin Dashboard
-├── 📂 frontend-user/       # React app for the Citizen/User Interface
-└── 📂 jan-drishti/
-    └── 📂 backend/         # Node.js/Express server and API
-```
-
----
+License
+This project is licensed under the MIT License.
 
 
-## 🤝 Contributing
 
-Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
-
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License. See the `LICENSE` file for more information.
