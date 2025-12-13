@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 const AdminAuthContext = createContext();
 
 export const AdminAuthProvider = ({ children }) => {
-  const [admin, setAdmin] = useState(null); // { id, username, token }
+  const [admin, setAdmin] = useState(null); 
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
@@ -32,10 +32,10 @@ export const AdminAuthProvider = ({ children }) => {
   }, []);
 
   const loginAdmin = (adminData) => {
-    console.log('Admin login data received:', adminData); // Debug log
+    console.log('Admin login data received:', adminData); 
     localStorage.setItem('janDrishtiAdmin', JSON.stringify(adminData));
     setAdmin(adminData);
-    console.log('Navigating to admin dashboard'); // Debug log
+    console.log('Navigating to admin dashboard'); 
     navigate('/dashboard');
   };
 

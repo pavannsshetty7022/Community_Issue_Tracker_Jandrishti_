@@ -1,33 +1,35 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   AppBar, Toolbar, Typography, Button, Container, Box, Alert,
   CircularProgress, Card, CardContent, CardActions, Grid, TextField,
-  MenuItem, Select, InputLabel, FormControl, IconButton, Chip
+  MenuItem, Select, InputLabel, FormControl, IconButton, Chip, Modal
 } from '@mui/material';
-import VisibilityIcon from '@mui/icons-material/Visibility';
+import DownloadIcon from '@mui/icons-material/Download';
+import CloseIcon from '@mui/icons-material/Close';
 import AdminService from '../../services/admin.service';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { socket } from '../../socket';
-import SecurityIcon from '@mui/icons-material/Security'; // For AppBar branding
-import LogoutIcon from '@mui/icons-material/Logout'; // For Logout button
-import SearchIcon from '@mui/icons-material/Search'; // For search button
+import SecurityIcon from '@mui/icons-material/Security'; 
+import LogoutIcon from '@mui/icons-material/Logout'; 
+import SearchIcon from '@mui/icons-material/Search'; 
 
 const AdminDashboard = () => {
   const { admin, logoutAdmin } = useAdminAuth();
-  const navigate = useNavigate();
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [statusFilter, setStatusFilter] = useState(''); // 'open', 'pending', 'resolved', or '' for all
+  const [statusFilter, setStatusFilter] = useState(''); 
   const [searchQuery, setSearchQuery] = useState('');
   const [updateMessage, setUpdateMessage] = useState('');
   const [updateMessageType, setUpdateMessageType] = useState('success');
-  const [animateContent, setAnimateContent] = useState(false); // New state for animation
+  const [animateContent, setAnimateContent] = useState(false); 
+  const [mediaModalOpen, setMediaModalOpen] = useState(false);
+  const [selectedMedia, setSelectedMedia] = useState(null);
+  const [downloadingMedia, setDownloadingMedia] = useState(null); 
 
   const fetchIssues = useCallback(async () => {
     if (!admin || !admin.token) {
-      console.log('No admin or token found'); // Debug log
+      console.log('No admin or token found'); 
       setError('Admin authentication required. Please log in.');
       setLoading(false);
       logoutAdmin();
@@ -36,15 +38,15 @@ const AdminDashboard = () => {
     setLoading(true);
     setError('');
     try {
-      console.log('Fetching issues with token:', admin.token.substring(0, 20) + '...'); // Debug log (partial token)
+      console.log('Fetching issues with token:', admin.token.substring(0, 20) + '...'); 
       const fetchedIssues = await AdminService.getAllIssues(admin.token, statusFilter, searchQuery);
-      console.log('Successfully fetched issues:', fetchedIssues.length); // Debug log
+      console.log('Successfully fetched issues:', fetchedIssues.length); 
       setIssues(Array.isArray(fetchedIssues) ? fetchedIssues : []);
     } catch (err) {
       console.error('Failed to fetch issues for admin:', err);
       setError(err.message || 'Failed to load issues. Please try logging out and back in.');
       if (err.message.includes('token') || err.message.includes('Unauthorized') || err.message.includes('expired')) {
-        console.log('Authentication error detected, logging out'); // Debug log
+        console.log('Authentication error detected, logging out'); 
         logoutAdmin();
       }
     } finally {
@@ -53,7 +55,7 @@ const AdminDashboard = () => {
   }, [admin, logoutAdmin, statusFilter, searchQuery]);
 
   useEffect(() => {
-    setAnimateContent(true); // Trigger animation on mount
+    setAnimateContent(true); 
     fetchIssues();
 
     socket.on('new_issue', (newIssue) => {
@@ -104,6 +106,50 @@ const AdminDashboard = () => {
       case 'resolved': return 'success';
       default: return 'default';
     }
+  };
+
+  const handleOpenMedia = (mediaPath) => {
+    setSelectedMedia(mediaPath);
+    setMediaModalOpen(true);
+  };
+
+  const handleCloseMedia = () => {
+    setMediaModalOpen(false);
+    setSelectedMedia(null);
+  };
+
+  const handleDownloadMedia = async (mediaPath) => {
+    setDownloadingMedia(mediaPath);
+    try {
+      const response = await fetch(`http://localhost:5000${mediaPath}`);
+      if (!response.ok) {
+        throw new Error('Failed to download file');
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = mediaPath.split('/').pop();
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Download failed:', error);
+      setError('Failed to download the file. Please try again.');
+    } finally {
+      setDownloadingMedia(null);
+    }
+  };
+
+  const isImage = (path) => {
+    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
+    return imageExtensions.some(ext => path.toLowerCase().endsWith(ext));
+  };
+
+  const isVideo = (path) => {
+    const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv'];
+    return videoExtensions.some(ext => path.toLowerCase().endsWith(ext));
   };
 
   if (loading && issues.length === 0) {
@@ -350,16 +396,83 @@ const AdminDashboard = () => {
                       <strong>Resolved On:</strong> {new Date(issue.resolved_at).toLocaleString()}
                     </Typography>
                   )}
-                  {issue.media_path && (
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>
-                      <img
-                        src={`http://localhost:5000${issue.media_path}`}
-                        alt="Issue Media"
-                        style={{ maxWidth: '100%', maxHeight: '180px', objectFit: 'contain', borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}
-                      />
-                      <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
-                        Click image to view in full size (not implemented in this snippet)
+                  {issue.media_paths && issue.media_paths.length > 0 && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 'medium' }}>
+                        <strong>Attached Media ({issue.media_paths.length}):</strong>
                       </Typography>
+                      <Grid container spacing={1}>
+                        {issue.media_paths.map((mediaPath, index) => (
+                          <Grid item xs={6} sm={4} key={index}>
+                            <Box sx={{ position: 'relative', borderRadius: 1, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
+                              {isImage(mediaPath) ? (
+                                <img
+                                  src={`http://localhost:5000${mediaPath}`}
+                                  alt={`Media ${index + 1}`}
+                                  style={{
+                                    width: '100%',
+                                    height: '80px',
+                                    objectFit: 'cover',
+                                    cursor: 'pointer',
+                                    display: 'block'
+                                  }}
+                                  onClick={() => handleOpenMedia(mediaPath)}
+                                />
+                              ) : isVideo(mediaPath) ? (
+                                <video
+                                  src={`http://localhost:5000${mediaPath}`}
+                                  style={{
+                                    width: '100%',
+                                    height: '80px',
+                                    objectFit: 'cover',
+                                    cursor: 'pointer',
+                                    display: 'block'
+                                  }}
+                                  onClick={() => handleOpenMedia(mediaPath)}
+                                  muted
+                                />
+                              ) : (
+                                <Box
+                                  sx={{
+                                    width: '100%',
+                                    height: '80px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    bgcolor: 'grey.100',
+                                    cursor: 'pointer'
+                                  }}
+                                  onClick={() => handleOpenMedia(mediaPath)}
+                                >
+                                  <Typography variant="caption" color="text.secondary">
+                                    File
+                                  </Typography>
+                                </Box>
+                              )}
+                              <IconButton
+                                size="small"
+                                disabled={downloadingMedia === mediaPath}
+                                sx={{
+                                  position: 'absolute',
+                                  top: 2,
+                                  right: 2,
+                                  bgcolor: 'rgba(255,255,255,0.8)',
+                                  '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' },
+                                  '&.Mui-disabled': {
+                                    bgcolor: 'rgba(255,255,255,0.6)',
+                                  }
+                                }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDownloadMedia(mediaPath);
+                                }}
+                              >
+                                <DownloadIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          </Grid>
+                        ))}
+                      </Grid>
                     </Box>
                   )}
                 </CardContent>
@@ -385,6 +498,84 @@ const AdminDashboard = () => {
           ))}
         </Grid>
       </Container>
+
+      <Modal
+        open={mediaModalOpen}
+        onClose={handleCloseMedia}
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: 2
+        }}
+      >
+        <Box
+          sx={{
+            maxWidth: '90vw',
+            maxHeight: '90vh',
+            bgcolor: 'background.paper',
+            borderRadius: 2,
+            boxShadow: 24,
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          <IconButton
+            onClick={handleCloseMedia}
+            sx={{
+              position: 'absolute',
+              top: 8,
+              right: 8,
+              zIndex: 1,
+              bgcolor: 'rgba(255,255,255,0.8)',
+              '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+          {selectedMedia && (
+            <Box sx={{ p: 1 }}>
+              {isImage(selectedMedia) ? (
+                <img
+                  src={`http://localhost:5000${selectedMedia}`}
+                  alt="Full size media"
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '85vh',
+                    objectFit: 'contain',
+                    display: 'block'
+                  }}
+                />
+              ) : isVideo(selectedMedia) ? (
+                <video
+                  src={`http://localhost:5000${selectedMedia}`}
+                  controls
+                  style={{
+                    maxWidth: '100%',
+                    maxHeight: '85vh',
+                    display: 'block'
+                  }}
+                />
+              ) : (
+                <Box sx={{ p: 4, textAlign: 'center' }}>
+                  <Typography variant="h6" color="text.secondary">
+                    Unsupported file type
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    startIcon={<DownloadIcon />}
+                    disabled={downloadingMedia === selectedMedia}
+                    onClick={() => handleDownloadMedia(selectedMedia)}
+                    sx={{ mt: 2 }}
+                  >
+                    {downloadingMedia === selectedMedia ? 'Downloading...' : 'Download File'}
+                  </Button>
+                </Box>
+              )}
+            </Box>
+          )}
+        </Box>
+      </Modal>
     </Box>
   );
 };

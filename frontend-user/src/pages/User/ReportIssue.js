@@ -8,7 +8,7 @@ import IssueService from '../../services/issue.service';
 import { useAuth } from '../../context/AuthContext';
 import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
 import EngineeringIcon from '@mui/icons-material/Engineering';
-import CloseIcon from '@mui/icons-material/Close'; // For removing individual media
+import CloseIcon from '@mui/icons-material/Close';
 
 const issueOptions = [
   'Road potholes', 'Broken streetlights', 'Water supply leakage or shortage',
@@ -34,9 +34,9 @@ const ReportIssue = () => {
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
   const [dateOfOccurrence, setDateOfOccurrence] = useState('');
-  const [mediaFiles, setMediaFiles] = useState([]); // Changed to array
-  const [previewMedia, setPreviewMedia] = useState([]); // Changed to array of {url, type}
-  const [existingMedia, setExistingMedia] = useState([]); // Changed to array for edit mode
+  const [mediaFiles, setMediaFiles] = useState([]);
+  const [previewMedia, setPreviewMedia] = useState([]);
+  const [existingMedia, setExistingMedia] = useState([]);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
   const [loading, setLoading] = useState(false);
@@ -65,10 +65,9 @@ const ReportIssue = () => {
             setLocation(issueToEdit.location);
             setDateOfOccurrence(issueToEdit.date_of_occurrence.split('T')[0]);
 
-            // Assuming media_path from backend is now an array of paths or a comma-separated string
-            const mediaPaths = Array.isArray(issueToEdit.media_path)
-              ? issueToEdit.media_path
-              : (issueToEdit.media_path ? issueToEdit.media_path.split(',') : []);
+            const mediaPaths = Array.isArray(issueToEdit.media_paths)
+              ? issueToEdit.media_paths
+              : (issueToEdit.media_paths ? issueToEdit.media_paths.split(',') : []);
 
             const formattedExistingMedia = mediaPaths.map(path => ({
               path: path.trim(),
@@ -77,7 +76,7 @@ const ReportIssue = () => {
             }));
 
             setExistingMedia(formattedExistingMedia);
-            setPreviewMedia(formattedExistingMedia.map(m => ({ url: m.url, type: m.type }))); // Add existing media to previews
+            setPreviewMedia(formattedExistingMedia.map(m => ({ url: m.url, type: m.type })));
           } else {
             setMessage('Issue not found for editing.');
             setMessageType('error');
@@ -103,20 +102,20 @@ const ReportIssue = () => {
 
     files.forEach(file => {
       const fileType = file.type.startsWith('image/') ? 'image' : (file.type.startsWith('video/') ? 'video' : 'other');
-      if (fileType !== 'other') { // Only accept image and video
+      if (fileType !== 'other') {
         newMediaFiles.push(file);
         newPreviewMedia.push({
           url: URL.createObjectURL(file),
           type: fileType,
-          name: file.name, // Store name for display
-          isNew: true // Mark as new for handling existing vs new uploads
+          name: file.name,
+          isNew: true
         });
       }
     });
 
     setMediaFiles(newMediaFiles);
     setPreviewMedia(newPreviewMedia);
-    event.target.value = null; // Clear input so same file can be selected again
+    event.target.value = null;
   };
 
   const handleRemoveMedia = (indexToRemove, isNewFile = true) => {
@@ -124,10 +123,8 @@ const ReportIssue = () => {
       setMediaFiles(prev => prev.filter((_, index) => index !== indexToRemove));
       setPreviewMedia(prev => prev.filter((_, index) => index !== indexToRemove));
     } else {
-      // For existing files, remove from existingMedia and previewMedia
       setExistingMedia(prev => prev.filter((_, index) => index !== indexToRemove));
       setPreviewMedia(prev => prev.filter((item, index) => {
-        // Find the specific existing media in previewMedia and remove it
         const originalIndex = prev.findIndex(p => p.url === item.url && !p.isNew);
         return originalIndex !== indexToRemove;
       }));
@@ -160,16 +157,14 @@ const ReportIssue = () => {
       description,
       location,
       dateOfOccurrence,
-      // Pass paths of existing media that are *not* being removed
-      existingMedia: isEditing ? existingMedia.map(m => m.path) : []
     };
 
     try {
       if (isEditing) {
-        await IssueService.editIssue(id, issueData, mediaFiles, user.token); // Pass mediaFiles array
+        await IssueService.editIssue(id, issueData, mediaFiles, existingMedia.map(m => m.path), user.token);
         setMessage('Issue updated successfully!');
       } else {
-        await IssueService.reportIssue(issueData, mediaFiles, user.token); // Pass mediaFiles array
+        await IssueService.reportIssue(issueData, mediaFiles, user.token);
         setMessage('Issue reported successfully!');
       }
       setMessageType('success');
@@ -354,7 +349,7 @@ const ReportIssue = () => {
                 style={{ display: 'none' }}
                 id="media-upload"
                 type="file"
-                multiple // IMPORTANT: Allows multiple file selection
+                multiple
                 onChange={handleFileChange}
               />
               <label htmlFor="media-upload">
@@ -379,7 +374,6 @@ const ReportIssue = () => {
                 </Button>
               </label>
 
-              {/* Display existing media and new previews */}
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
                 {previewMedia.map((media, index) => (
                   <Box key={media.url} sx={{ position: 'relative', width: 150, height: 150, border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
@@ -398,13 +392,13 @@ const ReportIssue = () => {
                         bgcolor: 'rgba(255, 255, 255, 0.7)',
                         '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
                       }}
-                      onClick={() => handleRemoveMedia(index, media.isNew)} // Pass isNew flag
+                      onClick={() => handleRemoveMedia(index, media.isNew)}
                     >
                       <CloseIcon fontSize="small" />
                     </IconButton>
-                    {media.name && !media.isNew && ( // Display name for new files only if needed
+                    {media.name && !media.isNew && (
                         <Typography variant="caption" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', px: 1, py: 0.5, textAlign: 'center' }}>
-                            {media.name}
+                          {media.name}
                         </Typography>
                     )}
                   </Box>

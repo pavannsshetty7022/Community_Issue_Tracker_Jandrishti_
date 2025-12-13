@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import EngineeringIcon from '@mui/icons-material/Engineering'; // Added for consistent branding icon
+import EngineeringIcon from '@mui/icons-material/Engineering';
 import AuthService from '../../services/auth.service';
 
 const Register = () => {
@@ -23,10 +23,9 @@ const Register = () => {
   const [messageType, setMessageType] = useState('error');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [animateContent, setAnimateContent] = useState(false); // New state for animation
+  const [animateContent, setAnimateContent] = useState(false);
   const navigate = useNavigate();
 
-  // Reset states on component mount (e.g., on page refresh)
   useEffect(() => {
     setUsername('');
     setPassword('');
@@ -35,7 +34,7 @@ const Register = () => {
     setMessageType('error');
     setShowPassword(false);
     setShowConfirmPassword(false);
-    setAnimateContent(true); // Trigger animation on mount
+    setAnimateContent(true);
   }, []);
 
   const handleClickShowPassword = () => {
@@ -86,19 +85,18 @@ const Register = () => {
   };
 
   return (
-    <Box sx={{ // Outer Box for background and overall layout
+    <Box sx={{
       flexGrow: 1,
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)', // Same background as Home
+      background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
       position: 'relative',
       overflow: 'hidden',
-      justifyContent: 'center', // Center content vertically
-      alignItems: 'center', // Center content horizontally
-      p: { xs: 2, sm: 4 }, // Add some padding around the container
+      justifyContent: 'center',
+      alignItems: 'center',
+      p: { xs: 2, sm: 4 },
     }}>
-      {/* Animated gradient circles for background effect (from Home.js) */}
       <Box sx={{
         position: 'absolute',
         top: '-100px',
@@ -136,27 +134,27 @@ const Register = () => {
         },
       }} />
 
-      <Container maxWidth="sm" sx={{ // Ensure container respects max width and centers
-        zIndex: 1, // Ensure it's above background animations
-        opacity: animateContent ? 1 : 0, // Fade-in effect
-        transform: animateContent ? 'translateY(0)' : 'translateY(20px)', // Slide-up effect
-        transition: 'opacity 1s ease-out, transform 1s ease-out', // Animation duration
+      <Container maxWidth="sm" sx={{
+        zIndex: 1,
+        opacity: animateContent ? 1 : 0,
+        transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
+        transition: 'opacity 1s ease-out, transform 1s ease-out',
       }}>
         <Box
-          sx={{ // Applied Paper-like styles
-            mt: 4, // Adjusted top margin to look centered within the viewport
-            mb: 4, // Adjusted bottom margin
+          sx={{
+            mt: 4,
+            mb: 4,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            p: { xs: 3, md: 6 }, // Responsive padding
-            boxShadow: '0 12px 40px 0 rgba(31, 38, 135, 0.18)', // Stronger shadow from Home.js
-            borderRadius: 8, // More rounded corners (from Home.js Paper)
-            bgcolor: 'rgba(255,255,255,0.8)', // Semi-transparent white background
-            backdropFilter: 'blur(16px)', // Frosted glass effect
+            p: { xs: 3, md: 6 },
+            boxShadow: '0 12px 40px 0 rgba(31, 38, 135, 0.18)',
+            borderRadius: 8,
+            bgcolor: 'rgba(255,255,255,0.8)',
+            backdropFilter: 'blur(16px)',
           }}
         >
-          <EngineeringIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} /> {/* Branding Icon */}
+          <EngineeringIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
           <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mb: 2, color: 'primary.dark' }}>
             Register for Jan Drishti
           </Typography>

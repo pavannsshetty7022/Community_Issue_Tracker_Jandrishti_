@@ -9,8 +9,8 @@ import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import SearchIcon from '@mui/icons-material/Search';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import LogoutIcon from '@mui/icons-material/Logout'; // Added for logout button
-import EngineeringIcon from '@mui/icons-material/Engineering'; // Added for consistent branding icon
+import LogoutIcon from '@mui/icons-material/Logout';
+import EngineeringIcon from '@mui/icons-material/Engineering';
 import { useAuth } from '../../context/AuthContext';
 import IssueService from '../../services/issue.service';
 import { socket } from '../../socket';
@@ -25,7 +25,7 @@ const UserDashboard = () => {
   const [issueToDelete, setIssueToDelete] = useState(null);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('success');
-  const [animateContent, setAnimateContent] = useState(false); // New state for animation
+  const [animateContent, setAnimateContent] = useState(false);
 
   const fetchIssues = useCallback(async () => {
     if (!user || !user.token || !user.id) {
@@ -51,7 +51,7 @@ const UserDashboard = () => {
   }, [user, logout]);
 
   useEffect(() => {
-    setAnimateContent(true); // Trigger animation on mount
+    setAnimateContent(true);
     fetchIssues();
 
     socket.on('status_updated', (updatedIssue) => {
@@ -122,7 +122,7 @@ const UserDashboard = () => {
     }
   };
 
-  if (loading && issues.length === 0) { // Only show full loading screen if no issues are loaded yet
+  if (loading && issues.length === 0) {
     return (
       <Box sx={{
         display: 'flex',
@@ -144,7 +144,7 @@ const UserDashboard = () => {
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)', // Page background
+      background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
       position: 'relative',
       overflow: 'hidden',
     }}>
@@ -186,11 +186,11 @@ const UserDashboard = () => {
         },
       }} />
 
-      <AppBar position="sticky" sx={{ // AppBar styling
+      <AppBar position="sticky" sx={{
         bgcolor: 'rgba(255, 255, 255, 0.8)',
         backdropFilter: 'blur(10px)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        zIndex: 2, // Ensure AppBar is above content
+        zIndex: 2,
       }}>
         <Toolbar>
           <EngineeringIcon sx={{ mr: 1, color: 'primary.main' }} />
@@ -237,10 +237,10 @@ const UserDashboard = () => {
       <Container maxWidth="lg" sx={{
         mt: 4,
         mb: 4,
-        zIndex: 1, // Ensure container is above background animations
-        opacity: animateContent ? 1 : 0, // Fade-in effect
-        transform: animateContent ? 'translateY(0)' : 'translateY(20px)', // Slide-up effect
-        transition: 'opacity 1s ease-out, transform 1s ease-out', // Animation duration
+        zIndex: 1,
+        opacity: animateContent ? 1 : 0,
+        transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
+        transition: 'opacity 1s ease-out, transform 1s ease-out',
       }}>
         <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.dark', textAlign: 'center', mb: 4 }}>
           Your Reported Issues
@@ -266,7 +266,7 @@ const UserDashboard = () => {
             onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}
             sx={{ flexGrow: 1 }}
             InputProps={{
-              sx: { borderRadius: 2 } // Rounded corners for text field
+              sx: { borderRadius: 2 }
             }}
             InputLabelProps={{
               sx: { fontWeight: 'medium' }

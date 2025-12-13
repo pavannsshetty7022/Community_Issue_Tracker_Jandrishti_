@@ -1,4 +1,4 @@
-// frontend-admin/src/App.js
+
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext';
@@ -8,14 +8,13 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { Box, CircularProgress } from '@mui/material';
 
-// Create a custom Material UI theme
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#3f51b5', // A shade of blue for primary elements
+      main: '#3f51b5', 
     },
     secondary: {
-      main: '#f50057', // A shade of pink for secondary elements
+      main: '#f50057', 
     },
   },
   typography: {
@@ -28,7 +27,7 @@ const theme = createTheme({
   },
 });
 
-// AdminPrivateRoute component to protect admin routes
+
 const AdminPrivateRoute = ({ children }) => {
   const { admin, loading } = useAdminAuth();
 
@@ -56,7 +55,7 @@ function App() {
                 <AdminDashboard />
               </AdminPrivateRoute>
             } />
-            {/* Redirect any unmatched routes to admin login */}
+            {}
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </AdminAuthProvider>

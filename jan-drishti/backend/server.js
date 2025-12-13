@@ -57,22 +57,9 @@ pool.getConnection()
       const [adminRows] = await pool.execute('SELECT COUNT(*) as count FROM admins');
       console.log('Admin count:', adminRows[0].count);
 
-      if (adminRows[0].count === 0) {
-        console.log('No admin accounts found, creating default admin...');
-        const defaultPassword = 'admin123';
-        const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-        await pool.execute(
-          'INSERT INTO admins (username, password_hash) VALUES (?, ?)',
-          ['admin', hashedPassword]
-        );
-        console.log('Default admin account created successfully:');
-        console.log('Username: admin');
-        console.log('Password: admin123');
-      } else {
-        console.log('Admin accounts already exist');
-      }
+      console.log('Admin accounts exist');
     } catch (error) {
-      console.error('Error with admin table or creating admin:', error.message);
+      console.error('Error with admin table:', error.message);
       console.error('Full error:', error);
 
       try {
@@ -87,22 +74,9 @@ pool.getConnection()
         `);
         console.log('Admin table created successfully');
 
-        const [adminRows] = await pool.execute('SELECT COUNT(*) as count FROM admins');
-        if (adminRows[0].count === 0) {
-          const defaultPassword = 'admin123';
-          const hashedPassword = await bcrypt.hash(defaultPassword, 10);
-          await pool.execute(
-            'INSERT INTO admins (username, password_hash) VALUES (?, ?)',
-            ['admin', hashedPassword]
-          );
-          console.log('Default admin account created after table creation:');
-          console.log('Username: admin');
-          console.log('Password: admin123');
-        } else {
-          console.log('Admin accounts already exist after table creation');
-        }
+        console.log('Admin table created, no default admin created');
       } catch (createError) {
-        console.error('Failed to create admin table or admin account:', createError.message);
+        console.error('Failed to create admin table:', createError.message);
       }
     }
 
@@ -550,7 +524,7 @@ app.get('/api/issues', authenticateToken, authorizeAdmin, async (req, res) => {
   const params = [];
   const conditions = [];
 
-  // Debug logging for admin issues fetch
+
   console.log('--- ADMIN ISSUES FETCH ---');
   console.log('Request user:', req.user);
   console.log('Status filter:', status);

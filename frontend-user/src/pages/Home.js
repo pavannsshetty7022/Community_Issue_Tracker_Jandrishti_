@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
-  AppBar, Toolbar, Typography, Button, Container, Box, Grid, Card, CardContent
+  AppBar, Toolbar, Typography, Button, Container, Box, Grid, Card
 } from '@mui/material';
 import LoginIcon from '@mui/icons-material/Login';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import DescriptionIcon from '@mui/icons-material/Description';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
-import EngineeringIcon from '@mui/icons-material/Engineering'; // Consistent branding icon
+import EngineeringIcon from '@mui/icons-material/Engineering';
 
 const Home = () => {
   const [animateContent, setAnimateContent] = useState(false);
@@ -135,18 +135,18 @@ const Home = () => {
         flexGrow: 1,
       }}>
         <Typography variant="h3" component="h1" align="center" gutterBottom sx={{
-          fontWeight: 700, // Kept bold
+          fontWeight: 700,
           color: 'primary.dark',
-          mb: 4, // Slightly reduced margin bottom
+          mb: 4,
           textShadow: '1px 1px 2px rgba(0,0,0,0.05)',
-          fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.5rem' } // Responsive font sizes
+          fontSize: { xs: '2.2rem', sm: '2.8rem', md: '3.5rem' }
         }}>
           Bridging Communities, Solving Problems
         </Typography>
         <Typography variant="h6" align="center" color="text.secondary" paragraph sx={{
           mb: 6,
-          fontWeight: 500, // Slightly bolder for prominence
-          fontSize: { xs: '1rem', sm: '1.15rem', md: '1.25rem' } // Responsive font sizes
+          fontWeight: 500,
+          fontSize: { xs: '1rem', sm: '1.15rem', md: '1.25rem' }
         }}>
           Jan Drishti is your platform to report local issues and track their resolution, empowering citizens for a better community.
         </Typography>
@@ -173,7 +173,7 @@ const Home = () => {
               <Typography variant="h6" component="h3" gutterBottom align="center" sx={{ fontWeight: 600 }}>
                 Report Issues Easily
               </Typography>
-              <Typography variant="body1" color="text.secondary" align="center" sx={{ fontWeight: 400 }}> {/* Explicitly set for clarity */}
+              <Typography variant="body1" color="text.secondary" align="center" sx={{ fontWeight: 400 }}>
                 Quickly submit issues like potholes, street light outages, or garbage problems with detailed descriptions.
               </Typography>
             </Card>
