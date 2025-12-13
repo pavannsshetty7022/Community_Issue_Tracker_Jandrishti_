@@ -1,1 +1,9 @@
-{"build": {"builder": "RAILPACK"}, "deploy": {"runtime": "V2"}} 
+{
+    "build": {
+        "builder": "RAILPACK",
+        "context": "jan-drishti/backend"
+    },
+    "deploy": {
+        "runtime": "V2"
+    }
+}
