@@ -1,93 +1,160 @@
-## JanDrishti - Public Grievance Management System 🗳️
+<div align="center">
+  <img src="https://raw.githubusercontent.com/TusharKesarwani/Front-End-Projects/main/Projects/Google%20Translate/assets/logo.png" alt="JanDrishti Logo" width="150"/>
+  <h1>JanDrishti</h1>
+  <p><b>Public Grievance Management System 🗳️</b></p>
+  <p>
+    A robust platform for citizens to report local issues and for authorities to manage and resolve them efficiently.
+  </p>
 
-##Project Overview
-JanDrishti is a comprehensive Public Grievance Management System designed to facilitate communication between citizens and authorities. The platform enables users to report issues, track their status, and receive updates on resolution progress.
-## Features
--User Registration and Authentication
--Issue Reporting with Media Upload
--Real-time Status Updates
--Admin Dashboard
--Issue Tracking System
--Profile Management
+  <!-- Badges -->
+  <p>
+    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT">
+    <img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg" alt="PRs Welcome">
+    <img src="https://img.shields.io/github/stars/TusharKesarwani/Community_Issue_Tracker_Jandrishti_?style=social" alt="GitHub Stars">
+    <img src="https://img.shields.io/github/forks/TusharKesarwani/Community_Issue_Tracker_Jandrishti_?style=social" alt="GitHub Forks">
+  </p>
+</div>
 
-## Tech Stack
-Frontend: React.js
-Backend: Node.js, Express.js
-Database: MySQL
-Real-time Updates: Socket.IO
+---
 
-## Setup Instructions
-Prerequisites
-Node.js (v14 or higher)
-MySQL Server
-npm or yarn
+## 🌟 Project Overview
 
-## Backend Setup
-1. Navigate to the backend directory:
-cd jan-drishti/backend
+**JanDrishti** is a comprehensive Public Grievance Management System designed to bridge the communication gap between citizens and local authorities. The platform empowers users to report civic issues (e.g., potholes, garbage disposal, water leakage), upload supporting media, and track the status of their complaints in real-time. An intuitive admin dashboard allows authorities to view, categorize, and update the status of these issues, ensuring transparency and timely resolution.
 
-2.  Install dependencies:
+---
+
+## ✨ Key Features
+
+| Feature                          | Description                                                                                                | Status      |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------- | ----------- |
+| **👤 User Authentication**       | Secure registration and login for citizens.                                                                | ✅ Complete |
+| **📝 Issue Reporting**           | Submit grievances with detailed descriptions, categories, and location data.                                 | ✅ Complete |
+| **🖼️ Media Upload**              | Attach images or videos to provide clear evidence of the issue.                                            | ✅ Complete |
+| **📊 Real-time Status Updates**   | Track the progress of reported issues from "Submitted" to "Resolved" via Socket.IO.                        | ✅ Complete |
+| **👑 Admin Dashboard**           | A dedicated interface for authorities to manage, assign, and update the status of grievances.                | ✅ Complete |
+| **📈 Issue Analytics**           | (Planned) Visual charts and statistics on issue types, resolution times, and department performance.       | ⏳ Planned  |
+| **🔔 Notification System**       | (Planned) Email or in-app notifications for status changes.                                                | ⏳ Planned  |
+| **✏️ Profile Management**         | Users can view their history of reported issues and manage their profile.                                  | ✅ Complete |
+
+---
+
+## 🛠️ Tech Stack
+
+| Category         | Technology                                                                                                                                                                                            |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend**     | <img src="https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white" alt="React"> <img src="https://img.shields.io/badge/-Socket.io-010101?logo=socket.io&logoColor=white" alt="Socket.io">   |
+| **Backend**      | <img src="https://img.shields.io/badge/-Node.js-339933?logo=node.js&logoColor=white" alt="Node.js"> <img src="https://img.shields.io/badge/-Express-000000?logo=express&logoColor=white" alt="Express">   |
+| **Database**     | <img src="https://img.shields.io/badge/-MySQL-4479A1?logo=mysql&logoColor=white" alt="MySQL">                                                                                                           |
+| **Deployment**   | <img src="https://img.shields.io/badge/-Azure-0089D6?logo=microsoft-azure&logoColor=white" alt="Azure"> (Planned)                                                                                         |
+
+---
+
+## 🚀 Getting Started
+
+Follow these instructions to set up the project locally.
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/en/) (v14 or higher)
+- [MySQL Server](https://dev.mysql.com/downloads/mysql/)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+
+### ⚙️ Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/TusharKesarwani/Community_Issue_Tracker_Jandrishti_.git
+    cd Community_Issue_Tracker_Jandrishti_
+    ```
+
+### 🖥️ Backend Setup
+
+1.  **Navigate to the backend directory:**
+    ```bash
+    cd jan-drishti/backend
+    ```
+
+2.  **Install dependencies:**
     ```bash
     npm install
+    ```
 
-3. Create a .env file with the following variables:
+3.  **Create a `.env` file** in the `jan-drishti/backend` directory and add the following environment variables.
+    ```env
+    # .env
+    PORT=5000
+    DB_HOST=your_database_host
+    DB_USER=your_database_user
+    DB_PASSWORD=your_database_password
+    DB_NAME=your_database_name
+    JWT_SECRET=a_strong_and_long_jwt_secret
+    ```
 
-PORT=5000
-DB_HOST=your_database_host
-DB_USER=your_database_user
-DB_PASSWORD=your_database_password
-DB_NAME=your_database_name
-JWT_SECRET=your_jwt_secret
-
-
-4.  Start the server:
+4.  **Start the server:**
     ```bash
-npm start
+    npm start
+    ```
+    The backend server will be running at `http://localhost:5000`.
 
-## User Frontend Setup
-1. Navigate to the user frontend directory:
-cd frontend-user
+### 🌐 Frontend Setup (User & Admin)
 
-2.  Install dependencies:
+The setup process is the same for both the `frontend-user` and `frontend-admin` applications.
+
+1.  **Navigate to the frontend directory** (repeat for both `frontend-user` and `frontend-admin`):
     ```bash
-npm install
-Create a .env file:
+    # For user frontend
+    cd frontend-user
+    # For admin frontend
+    # cd frontend-admin
+    ```
 
-REACT_APP_API_BASE_URL=http://localhost:5000/api
-
-
-4.  Start the development server:
+2.  **Install dependencies:**
     ```bash
-npm start
-Admin Frontend Setup
-Navigate to the admin frontend directory:
+    npm install
+    ```
 
-cd frontend-admin
+3.  **Create a `.env` file** in the frontend directory and add the following:
+    ```env
+    # .env (for both frontend-user and frontend-admin)
+    REACT_APP_API_BASE_URL=http://localhost:5000/api
+    ```
 
-
-2.  Install dependencies:
+4.  **Start the development server:**
     ```bash
-npm install
-Create a .env file:
+    npm start
+    ```
+    - The user frontend will be accessible at `http://localhost:3000`.
+    - The admin frontend will be accessible at `http://localhost:3001` (or another available port).
 
-REACT_APP_API_BASE_URL=http://localhost:5000/api
+---
 
+## 📂 Project Structure
 
-4.  Start the development server:
-    ```bash
-npm start
-Project Structure
-├── frontend-admin/      # Admin dashboard interface
-├── frontend-user/       # User interface for citizens
-└── jan-drishti/         # Backend server
-    └── backend/
-Default Admin Credentials
-Username: admin
+The project uses a monorepo structure to keep the frontend and backend codebases separate but organized.
 
-Password: admin123
+```
+Community_Issue_Tracker_Jandrishti_/
+├── 📂 frontend-admin/      # React app for the Admin Dashboard
+├── 📂 frontend-user/       # React app for the Citizen/User Interface
+└── 📂 jan-drishti/
+    └── 📂 backend/         # Node.js/Express server and API
+```
 
-License
-This project is licensed under the MIT License.
-
+---
 
 
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
+
+1.  Fork the Project
+2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4.  Push to the Branch (`git push origin feature/AmazingFeature`)
+5.  Open a Pull Request
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more information.
