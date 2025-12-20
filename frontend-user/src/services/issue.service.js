@@ -1,4 +1,4 @@
-// frontend-user/src/services/issue.service.js
+
 const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
 const reportIssue = async (issueData, mediaFiles, token) => {
@@ -6,7 +6,6 @@ const reportIssue = async (issueData, mediaFiles, token) => {
   for (const key in issueData) {
     formData.append(key, issueData[key]);
   }
-  // Append each media file to the 'media' field
   if (mediaFiles && mediaFiles.length > 0) {
     mediaFiles.forEach((file) => {
       formData.append('media', file);
@@ -61,19 +60,17 @@ const editIssue = async (issueId, issueData, newMediaFiles, existingMediaPaths, 
     formData.append(key, issueData[key]);
   }
 
-  // Append new media files to 'newMedia'
+
   if (newMediaFiles && newMediaFiles.length > 0) {
     newMediaFiles.forEach((file) => {
       formData.append('newMedia', file);
     });
   }
 
-  // Append existing media paths as a JSON string to 'existingMedia'
-  // The backend will parse this JSON string back into an array
   if (existingMediaPaths && existingMediaPaths.length > 0) {
     formData.append('existingMedia', JSON.stringify(existingMediaPaths));
   } else {
-    formData.append('existingMedia', '[]'); // Ensure it's always an array, even if empty
+    formData.append('existingMedia', '[]'); 
   }
 
   const response = await fetch(`${API_URL}/issues/${issueId}`, {
