@@ -18,7 +18,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+  origin: ["http://localhost:5100", "http://localhost:5200"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
   exposedHeaders: ['Content-Length', 'Content-Type'],
@@ -26,7 +26,7 @@ app.use(cors({
 
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+    origin: ["http://localhost:5100", "http://localhost:5200"],
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true
   }
@@ -88,7 +88,7 @@ pool.getConnection()
   });
 
 app.use(cors({
-  origin: ["http://localhost:3000", "http://localhost:3001", "http://localhost:3002"],
+  origin: ["http://localhost:5100", "http://localhost:5200"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true,
   allowedHeaders: ["Content-Type", "Authorization"]
@@ -111,6 +111,11 @@ const storage = multer.diskStorage({
   }
 });
 const upload = multer({ storage: storage });
+
+app.use('/api', (req, res, next) => {
+  console.log(`[API] ${req.method} ${req.url}`);
+  next();
+});
 
 const authenticateToken = (req, res, next) => {
   const authHeader = req.headers['authorization'];
@@ -136,18 +141,70 @@ const authorizeAdmin = (req, res, next) => {
   }
 };
 
-app.post('/api/auth/register', async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) {
-    return res.status(400).json({ message: 'Username and password are required' });
+app.get('/api/admin/test-connectivity', (req, res) => {
+  res.json({ message: 'Backend Admin API is reachable' });
+});
+
+app.get('/api/admin/get-single-issue/:id', authenticateToken, authorizeAdmin, async (req, res) => {
+  const issueDbId = req.params.id;
+  console.log(`[ADMIN] Fetching single issue ID: ${issueDbId}`);
+  try {
+    const [rows] = await pool.execute(`
+      SELECT
+          i.*,
+          u.full_name, u.phone_number, u.address, u.user_type, u.user_type_custom
+      FROM issues i
+      JOIN users u ON i.user_id = u.id
+      WHERE i.id = ?
+    `, [issueDbId]);
+
+    if (rows.length === 0) {
+      console.log(`[ADMIN] Issue not found: ${issueDbId}`);
+      return res.status(404).json({ message: 'Issue not found' });
+    }
+
+    const issue = rows[0];
+    if (issue.media_paths && typeof issue.media_paths === 'string') {
+      try {
+        issue.media_paths = JSON.parse(issue.media_paths);
+      } catch (parseError) {
+        issue.media_paths = [];
+      }
+    }
+
+    console.log(`[ADMIN] Successfully fetched issue: ${issue.issue_id}`);
+    res.setHeader('Content-Type', 'application/json');
+    res.status(200).json(issue);
+  } catch (error) {
+    console.error('[ADMIN] Fetch single issue error:', error);
+    res.status(500).json({ message: 'Server error fetching issue details', error: error.message });
   }
+});
+
+app.post('/api/auth/register', async (req, res) => {
+  const { username, password, fullName, phoneNumber, address, userType, userTypeCustom } = req.body;
+
+  if (!username || !password || !fullName || !phoneNumber || !address || !userType) {
+    return res.status(400).json({ message: 'All fields are required' });
+  }
+
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const [result] = await pool.execute(
-      'INSERT INTO users (username, password_hash) VALUES (?, ?)',
-      [username, hashedPassword]
+      'INSERT INTO users (username, password_hash, full_name, phone_number, address, user_type, user_type_custom) VALUES (?, ?, ?, ?, ?, ?, ?)',
+      [username, hashedPassword, fullName, phoneNumber, address, userType, userTypeCustom || null]
     );
-    res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+
+    const userId = result.insertId;
+    const token = jwt.sign({ id: userId, username }, JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(201).json({
+      message: 'User registered successfully',
+      token,
+      id: userId,
+      username,
+      profileCompleted: true
+    });
   } catch (error) {
     if (error.code === 'ER_DUP_ENTRY') {
       return res.status(409).json({ message: 'Username already exists' });
@@ -289,7 +346,11 @@ app.post('/api/auth/profile', authenticateToken, async (req, res) => {
 app.get('/api/auth/profile', authenticateToken, async (req, res) => {
   const userId = req.user.id;
   try {
-    const [rows] = await pool.execute('SELECT full_name, phone_number, address, user_type, user_type_custom FROM users WHERE id = ?', [userId]);
+    const [rows] = await pool.execute(`
+      SELECT u.username, u.full_name, u.phone_number, u.address, u.user_type, u.user_type_custom 
+      FROM users u 
+      WHERE u.id = ?
+    `, [userId]);
     if (rows.length === 0) {
       return res.status(404).json({ message: 'User profile not found' });
     }
@@ -299,6 +360,8 @@ app.get('/api/auth/profile', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Server error fetching profile' });
   }
 });
+
+
 
 app.post('/api/issues', authenticateToken, upload.array('media', 10), async (req, res) => {
   const { title, description, location, dateOfOccurrence } = req.body;
@@ -313,7 +376,7 @@ app.post('/api/issues', authenticateToken, upload.array('media', 10), async (req
   try {
     const [result] = await pool.execute(
       'INSERT INTO issues (issue_id, user_id, title, description, location, date_of_occurrence, media_paths, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())',
-      [issueId, userId, title, description, location, dateOfOccurrence, mediaPaths, 'open']
+      [issueId, userId, title, description, location, dateOfOccurrence, mediaPaths, 'OPEN']
     );
 
     const [newIssueRows] = await pool.execute(`
@@ -328,7 +391,7 @@ app.post('/api/issues', authenticateToken, upload.array('media', 10), async (req
 
     const newIssue = newIssueRows[0];
     if (newIssue && typeof newIssue.media_paths === 'string') {
-        newIssue.media_paths = JSON.parse(newIssue.media_paths);
+      newIssue.media_paths = JSON.parse(newIssue.media_paths);
     }
 
     io.emit('new_issue', newIssue);
@@ -350,15 +413,15 @@ app.get('/api/issues/user/:userId', authenticateToken, async (req, res) => {
   try {
     const [rows] = await pool.execute('SELECT * FROM issues WHERE user_id = ? ORDER BY created_at DESC', [requestedUserId]);
     const issuesWithParsedMedia = rows.map(issue => {
-        if (issue.media_paths && typeof issue.media_paths === 'string') {
-            try {
-                return { ...issue, media_paths: JSON.parse(issue.media_paths) };
-            } catch (parseError) {
-                console.error('Error parsing media_paths for issue ID:', issue.id, parseError);
-                return { ...issue, media_paths: [] };
-            }
+      if (issue.media_paths && typeof issue.media_paths === 'string') {
+        try {
+          return { ...issue, media_paths: JSON.parse(issue.media_paths) };
+        } catch (parseError) {
+          console.error('Error parsing media_paths for issue ID:', issue.id, parseError);
+          return { ...issue, media_paths: [] };
         }
-        return issue;
+      }
+      return issue;
     });
     res.json(issuesWithParsedMedia);
   } catch (error) {
@@ -377,12 +440,12 @@ app.get('/api/issues/search/:issueId', authenticateToken, async (req, res) => {
     }
     const issue = rows[0];
     if (issue && typeof issue.media_paths === 'string') {
-        try {
-            issue.media_paths = JSON.parse(issue.media_paths);
-        } catch (parseError) {
-            console.error('Error parsing media_paths for issue ID:', issue.id, parseError);
-            issue.media_paths = [];
-        }
+      try {
+        issue.media_paths = JSON.parse(issue.media_paths);
+      } catch (parseError) {
+        console.error('Error parsing media_paths for issue ID:', issue.id, parseError);
+        issue.media_paths = [];
+      }
     }
     res.json(issue);
   } catch (error) {
@@ -408,7 +471,7 @@ app.put('/api/issues/:id', authenticateToken, upload.fields([{ name: 'newMedia',
 
   const newMediaFiles = req.files && req.files['newMedia'] ? req.files['newMedia'] : [];
   const newMediaPaths = newMediaFiles.map(file => `/uploads/${file.filename}`);
-  
+
   const allMediaPaths = JSON.stringify([...existingMediaPaths, ...newMediaPaths]);
 
   if (!title || !description || !location || !dateOfOccurrence) {
@@ -424,31 +487,31 @@ app.put('/api/issues/:id', authenticateToken, upload.fields([{ name: 'newMedia',
 
     let currentDbMediaPaths = [];
     if (issue.media_paths && typeof issue.media_paths === 'string') {
-        try {
-            currentDbMediaPaths = JSON.parse(issue.media_paths);
-        } catch (parseError) {
-            console.error('Error parsing existing DB media_paths for cleanup (issue ID: ' + issue.id + '):', parseError);
-            currentDbMediaPaths = [];
-        }
+      try {
+        currentDbMediaPaths = JSON.parse(issue.media_paths);
+      } catch (parseError) {
+        console.error('Error parsing existing DB media_paths for cleanup (issue ID: ' + issue.id + '):', parseError);
+        currentDbMediaPaths = [];
+      }
     } else if (Array.isArray(issue.media_paths)) {
-        currentDbMediaPaths = issue.media_paths;
+      currentDbMediaPaths = issue.media_paths;
     }
 
     const pathsToDelete = currentDbMediaPaths.filter(p => !existingMediaPaths.includes(p));
     pathsToDelete.forEach(filePath => {
-        const fullPath = path.join(__dirname, filePath);
-        if (fs.existsSync(fullPath)) {
-            fs.unlink(fullPath, (err) => {
-                if (err) console.error(`Error deleting old media file: ${fullPath}`, err);
-            });
-        }
+      const fullPath = path.join(__dirname, filePath);
+      if (fs.existsSync(fullPath)) {
+        fs.unlink(fullPath, (err) => {
+          if (err) console.error(`Error deleting old media file: ${fullPath}`, err);
+        });
+      }
     });
 
     if (issue.user_id !== userId) {
       return res.status(403).json({ message: 'Unauthorized: You can only edit your own issues' });
     }
-    if (issue.status !== 'open') {
-      return res.status(400).json({ message: 'Issue can only be edited if status is "open"' });
+    if (issue.status.toUpperCase() !== 'OPEN') {
+      return res.status(400).json({ message: 'Issue can only be edited if status is "OPEN"' });
     }
 
     await pool.execute(
@@ -475,20 +538,20 @@ app.delete('/api/issues/:id', authenticateToken, async (req, res) => {
     if (issue.user_id !== userId) {
       return res.status(403).json({ message: 'Unauthorized: You can only delete your own issues' });
     }
-    if (issue.status !== 'open') {
-      return res.status(400).json({ message: 'Issue can only be deleted if status is "open"' });
+    if (issue.status.toUpperCase() !== 'OPEN') {
+      return res.status(400).json({ message: 'Issue can only be deleted if status is "OPEN"' });
     }
 
     let mediaPathsToDelete = [];
     if (issue.media_paths && typeof issue.media_paths === 'string') {
-        try {
-            mediaPathsToDelete = JSON.parse(issue.media_paths);
-        } catch (parseError) {
-            console.error('Error parsing media_paths for deletion (issue ID: ' + issue.id + '):', parseError);
-            mediaPathsToDelete = [];
-        }
+      try {
+        mediaPathsToDelete = JSON.parse(issue.media_paths);
+      } catch (parseError) {
+        console.error('Error parsing media_paths for deletion (issue ID: ' + issue.id + '):', parseError);
+        mediaPathsToDelete = [];
+      }
     } else if (Array.isArray(issue.media_paths)) {
-        mediaPathsToDelete = issue.media_paths;
+      mediaPathsToDelete = issue.media_paths;
     }
 
     if (mediaPathsToDelete.length > 0) {
@@ -509,6 +572,9 @@ app.delete('/api/issues/:id', authenticateToken, async (req, res) => {
     res.status(500).json({ message: 'Server error deleting issue' });
   }
 });
+
+
+
 
 app.get('/api/issues', authenticateToken, authorizeAdmin, async (req, res) => {
   const { status, search } = req.query;
@@ -552,15 +618,15 @@ app.get('/api/issues', authenticateToken, authorizeAdmin, async (req, res) => {
     const [rows] = await pool.execute(query, params);
     console.log('Fetched rows count:', rows.length);
     const issuesWithParsedMedia = rows.map(issue => {
-        if (issue.media_paths && typeof issue.media_paths === 'string') {
-            try {
-                return { ...issue, media_paths: JSON.parse(issue.media_paths) };
-            } catch (parseError) {
-                console.error('Error parsing media_paths for issue ID:', issue.id, parseError);
-                return { ...issue, media_paths: [] };
-            }
+      if (issue.media_paths && typeof issue.media_paths === 'string') {
+        try {
+          return { ...issue, media_paths: JSON.parse(issue.media_paths) };
+        } catch (parseError) {
+          console.error('Error parsing media_paths for issue ID:', issue.id, parseError);
+          return { ...issue, media_paths: [] };
         }
-        return issue;
+      }
+      return issue;
     });
     console.log('Returning issues to client:', issuesWithParsedMedia.length);
     res.json(issuesWithParsedMedia);
@@ -578,9 +644,21 @@ app.get('/api/issues', authenticateToken, authorizeAdmin, async (req, res) => {
 
 app.put('/api/issues/:id/status', authenticateToken, authorizeAdmin, async (req, res) => {
   const issueDbId = req.params.id;
-  const { status } = req.body;
+  const rawStatus = req.body.status;
 
-  if (!['open', 'pending', 'resolved'].includes(status)) {
+  console.log('--- STATUS UPDATE DEBUG ---');
+  console.log('Issue ID:', issueDbId);
+  console.log('Request Body:', JSON.stringify(req.body));
+  console.log('Request Headers:', JSON.stringify(req.headers));
+  console.log('Raw Status:', rawStatus);
+
+
+  const status = (typeof rawStatus === 'string') ? rawStatus.trim().toUpperCase() : '';
+  console.log('Normalized Status:', status);
+
+  const allowedStatuses = ['OPEN', 'PENDING', 'RESOLVED', 'REJECTED'];
+  if (!allowedStatuses.includes(status)) {
+    console.error(`[ADMIN] Validation failed: "${status}" is not in [${allowedStatuses.join(', ')}]`);
     return res.status(400).json({ message: 'Invalid status provided' });
   }
 
@@ -591,14 +669,15 @@ app.put('/api/issues/:id/status', authenticateToken, authorizeAdmin, async (req,
     }
     const currentIssue = issueRows[0];
 
-    if (currentIssue.status === status) {
-        return res.status(200).json({ message: 'Status already updated' });
+    if (currentIssue.status.toUpperCase() === status) {
+      return res.status(200).json({ message: 'Status already updated' });
     }
 
-    const resolvedAt = status === 'resolved' ? new Date() : null;
+    const normalizedStatus = status.toUpperCase();
+    const resolvedAt = normalizedStatus === 'RESOLVED' ? new Date() : null;
     await pool.execute(
       'UPDATE issues SET status = ?, resolved_at = ? WHERE id = ?',
-      [status, resolvedAt, issueDbId]
+      [normalizedStatus, resolvedAt, issueDbId]
     );
 
     const [updatedIssueRows] = await pool.execute(`
@@ -615,12 +694,12 @@ app.put('/api/issues/:id/status', authenticateToken, authorizeAdmin, async (req,
     const updatedIssue = updatedIssueRows[0];
 
     if (updatedIssue && typeof updatedIssue.media_paths === 'string') {
-        try {
-            updatedIssue.media_paths = JSON.parse(updatedIssue.media_paths);
-        } catch (parseError) {
-            console.error('Error parsing media_paths for updated issue (ID: ' + updatedIssue.id + '):', parseError);
-            updatedIssue.media_paths = [];
-        }
+      try {
+        updatedIssue.media_paths = JSON.parse(updatedIssue.media_paths);
+      } catch (parseError) {
+        console.error('Error parsing media_paths for updated issue (ID: ' + updatedIssue.id + '):', parseError);
+        updatedIssue.media_paths = [];
+      }
     }
 
     io.emit('status_updated', updatedIssue);

@@ -1,20 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import {
-  TextField,
-  Button,
-  Typography,
-  Container,
-  Box,
-  Alert,
-  CircularProgress,
-  InputAdornment,
-  IconButton
-} from '@mui/material';
-import Visibility from '@mui/icons-material/Visibility'
-import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner, InputGroup } from 'react-bootstrap';
 import AdminService from '../../services/admin.service';
 import { useAdminAuth } from '../../context/AdminAuthContext';
-import SecurityIcon from '@mui/icons-material/Security';
+import { useTheme } from '../../context/ThemeContext';
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
@@ -22,8 +10,10 @@ const AdminLogin = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
   const [loading, setLoading] = useState(false);
+  const [isSuccessLoading, setIsSuccessLoading] = useState(false); // New state for success animation
   const [showPassword, setShowPassword] = useState(false);
   const { loginAdmin } = useAdminAuth();
+  const { isDarkMode } = useTheme();
   const [animateContent, setAnimateContent] = useState(false);
 
   useEffect(() => {
@@ -32,16 +22,18 @@ const AdminLogin = () => {
     setMessage('');
     setMessageType('error');
     setLoading(false);
+    setIsSuccessLoading(false);
     setShowPassword(false);
     setAnimateContent(true);
+
+    return () => {
+      // Cleanup
+      setIsSuccessLoading(false);
+    };
   }, []);
 
   const handleClickShowPassword = () => {
     setShowPassword((prev) => !prev);
-  };
-
-  const handleMouseDownPassword = (event) => {
-    event.preventDefault();
   };
 
   const handleLogin = async (event) => {
@@ -52,7 +44,16 @@ const AdminLogin = () => {
 
     try {
       const data = await AdminService.login(username, password);
-      loginAdmin(data);
+
+      // Stop form loading, start success loading
+      setLoading(false);
+      setIsSuccessLoading(true);
+
+      // Wait 2 seconds before redirecting
+      setTimeout(() => {
+        loginAdmin(data);
+      }, 2000);
+
     } catch (error) {
       console.error('Admin login error:', error);
       let errorMsg = 'Something went wrong during admin login.';
@@ -64,166 +65,153 @@ const AdminLogin = () => {
       }
       setMessage(errorMsg);
       setMessageType('error');
-    } finally {
-      setLoading(false);
+      setLoading(false); // Only stop loading on error, keep true on success until transition
     }
   };
 
+  if (isSuccessLoading) {
+    return (
+      <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center" style={{
+        background: isDarkMode ? '#121417' : '#f8fafc',
+        transition: 'background-color 0.3s ease'
+      }}>
+        <Spinner animation="grow" variant="primary" style={{ width: '3rem', height: '3rem' }} />
+        <h5 className={`mt-4 fw-bold ${isDarkMode ? 'text-white' : 'text-dark'}`}>Loading reported issues...</h5>
+        <p className="text-muted small">Accessing Admin Dashboard</p>
+      </div>
+    );
+  }
+
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
-      <Box
-        sx={{
-          position: 'absolute',
-          top: '-100px',
-          left: '-100px',
-          width: '300px',
-          height: '300px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, #90caf9 0%, #e0e7ff 80%)',
-          opacity: 0.4,
-          zIndex: 0,
-          filter: 'blur(30px)',
-          animation: 'float 8s ease-in-out infinite',
-          '@keyframes float': {
-            '0%': { transform: 'translateY(0)' },
-            '50%': { transform: 'translateY(40px)' },
-            '100%': { transform: 'translateY(0)' },
-          },
-        }}
-      />
-      <Box
-        sx={{
-          position: 'absolute',
-          bottom: '-120px',
-          right: '-120px',
-          width: '350px',
-          height: '350px',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, #f48fb1 0%, #f5f7fa 80%)',
-          opacity: 0.3,
-          zIndex: 0,
-          filter: 'blur(40px)',
-          animation: 'float2 10s ease-in-out infinite',
-          '@keyframes float2': {
-            '0%': { transform: 'translateY(0)' },
-            '50%': { transform: 'translateY(-30px)' },
-            '100%': { transform: 'translateY(0)' },
-          },
-        }}
-      />
+    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{
+      background: 'linear-gradient(135deg, var(--background-color) 0%, #f0f4f8 100%)',
+      position: 'relative',
+      overflow: 'hidden'
+    }}>
+      <div style={{
+        position: 'absolute',
+        top: '-100px',
+        left: '-100px',
+        width: '300px',
+        height: '300px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(30, 58, 138, 0.1) 0%, rgba(248, 250, 252, 0.8) 80%)',
+        zIndex: 0,
+        filter: 'blur(30px)',
+        animation: 'float 8s ease-in-out infinite'
+      }} />
+      <div style={{
+        position: 'absolute',
+        bottom: '-120px',
+        right: '-120px',
+        width: '350px',
+        height: '350px',
+        borderRadius: '50%',
+        background: 'radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, rgba(248, 250, 252, 0.8) 80%)',
+        zIndex: 0,
+        filter: 'blur(40px)',
+        animation: 'float2 10s ease-in-out infinite'
+      }} />
 
-      <Container maxWidth="sm">
-        <Box
-          sx={{
-            mt: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            p: 4,
-            boxShadow: '0 8px 30px rgba(0,0,0,0.1)',
-            borderRadius: 4,
-            bgcolor: 'rgba(255, 255, 255, 0.9)',
-            backdropFilter: 'blur(8px)',
-            zIndex: 1,
-            opacity: animateContent ? 1 : 0,
-            transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
-            transition: 'opacity 1s ease-out, transform 1s ease-out',
-          }}
-        >
-          <SecurityIcon sx={{ fontSize: 70, mb: 2, color: 'primary.main' }} />
-          <Typography component="h1" variant="h4" sx={{ mb: 3, fontWeight: 700, color: 'primary.dark' }}>
-            Admin Login
-          </Typography>
+      <style>
+        {`
+          @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(40px); }
+            100% { transform: translateY(0); }
+          }
+          @keyframes float2 {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+          }
+        `}
+      </style>
 
-          <Box component="form" onSubmit={handleLogin} sx={{ mt: 2, width: '100%' }} autoComplete="off">
-            {message && <Alert severity={messageType} sx={{ mb: 2, borderRadius: 2 }}>{message}</Alert>}
+      <Container>
+        <Row className="justify-content-center">
+          <Col xs={12} md={6} lg={4}>
+            <Card className="shadow-lg border-0" style={{
+              backgroundColor: 'var(--card-color)',
+              zIndex: 1,
+              opacity: animateContent ? 1 : 0,
+              transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
+              transition: 'opacity 1s ease-out, transform 1s ease-out'
+            }}>
+              <Card.Body className="p-4">
+                <div className="text-center mb-4">
+                  <i className="bi bi-shield-lock display-4 text-primary mb-3"></i>
+                  <h2 className="fw-bold text-primary">Admin Login</h2>
+                  <p className="text-muted">Access the administrative dashboard</p>
+                </div>
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="adminUsername"
-              label="Admin Username"
-              name="adminUsername"
-              autoComplete="username"
-              autoFocus
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              variant="outlined"
-              InputProps={{
-                sx: { borderRadius: 2 }
-              }}
-              InputLabelProps={{
-                sx: { fontWeight: 'medium' }
-              }}
-            />
+                <Form onSubmit={handleLogin} autoComplete="off">
+                  {message && (
+                    <Alert variant={messageType === 'error' ? 'danger' : 'success'} className="mb-3">
+                      {message}
+                    </Alert>
+                  )}
 
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              name="adminPassword"
-              label="Password"
-              id="adminPassword"
-              type={showPassword ? 'text' : 'password'}
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              variant="outlined"
-              InputProps={{
-                sx: { borderRadius: 2 },
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      onMouseDown={handleMouseDownPassword}
-                      edge="end"
-                    >
-                      {showPassword ? <VisibilityOff /> : <Visibility />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-              InputLabelProps={{
-                sx: { fontWeight: 'medium' }
-              }}
-            />
+                  <Form.Group className="mb-3">
+                    <Form.Label>Admin Username</Form.Label>
+                    <Form.Control
+                      type="text"
+                      id="adminUsername"
+                      placeholder="Enter admin username"
+                      value={username}
+                      onChange={(e) => setUsername(e.target.value)}
+                      required
+                      autoFocus
+                    />
+                  </Form.Group>
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{
-                mt: 3,
-                mb: 2,
-                borderRadius: 3,
-                fontWeight: 'bold',
-                py: 1.5,
-                bgcolor: 'primary.main',
-                '&:hover': {
-                  bgcolor: 'primary.dark',
-                  boxShadow: 5,
-                },
-              }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : 'Login as Admin'}
-            </Button>
-          </Box>
-        </Box>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Password</Form.Label>
+                    <InputGroup>
+                      <Form.Control
+                        type={showPassword ? 'text' : 'password'}
+                        id="adminPassword"
+                        placeholder="Enter password"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                      />
+                      <Button
+                        variant="outline-secondary"
+                        onClick={handleClickShowPassword}
+                        aria-label="Toggle password visibility"
+                      >
+                        <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
+                      </Button>
+                    </InputGroup>
+                  </Form.Group>
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    className="w-100 fw-bold"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        Logging in...
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-box-arrow-in-right me-2"></i>
+                        Login as Admin
+                      </>
+                    )}
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       </Container>
-    </Box>
+    </div>
   );
 };
 

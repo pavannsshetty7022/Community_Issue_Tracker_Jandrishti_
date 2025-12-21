@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Typography, Box } from '@mui/material';
-import EngineeringIcon from '@mui/icons-material/Engineering';
 
 const FlashScreen = () => {
   const navigate = useNavigate();
@@ -15,25 +13,17 @@ const FlashScreen = () => {
   }, [navigate]);
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        backgroundColor: '#f0f2f5',
-        color: '#3f51b5',
+    <div
+      className="d-flex flex-column justify-content-center align-items-center vh-100"
+      style={{
+        backgroundColor: 'var(--background-color)',
+        color: 'var(--primary-color)',
       }}
     >
-      <EngineeringIcon sx={{ fontSize: 100, mb: 2 }} />
-      <Typography variant="h3" component="h1" gutterBottom>
-        Jan Drishti
-      </Typography>
-      <Typography variant="h6">
-        Community Issue Tracker
-      </Typography>
-    </Box>
+      <i className="bi bi-tools display-1 mb-3"></i>
+      <h1 className="display-4 fw-bold mb-3">JanDrishti</h1>
+      <h4 className="text-muted">Community Issue Tracker</h4>
+    </div>
   );
 };
 

@@ -2,31 +2,14 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AdminAuthProvider, useAdminAuth } from './context/AdminAuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import AOS from 'aos';
+import 'aos/dist/aos.css';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import CssBaseline from '@mui/material/CssBaseline';
-import { Box, CircularProgress } from '@mui/material';
+import IssueDetails from './pages/Admin/IssueDetails';
+import { Spinner } from 'react-bootstrap';
 import useDocumentTitle from './utils/useDocumentTitle';
-
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#3f51b5', 
-    },
-    secondary: {
-      main: '#f50057', 
-    },
-  },
-  typography: {
-    fontFamily: [
-      'Roboto',
-      '"Helvetica Neue"',
-      'Arial',
-      'sans-serif',
-    ].join(','),
-  },
-});
 
 
 const AdminPrivateRoute = ({ children }) => {
@@ -34,9 +17,9 @@ const AdminPrivateRoute = ({ children }) => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-        <CircularProgress />
-      </Box>
+      <div className="d-flex justify-content-center align-items-center vh-100">
+        <Spinner animation="border" variant="primary" />
+      </div>
     );
   }
 
@@ -46,6 +29,15 @@ const AdminPrivateRoute = ({ children }) => {
 const AppContent = () => {
   useDocumentTitle();
 
+  React.useEffect(() => {
+    AOS.init({
+      duration: 800,
+      easing: 'ease-in-out',
+      once: true,
+      mirror: false
+    });
+  }, []);
+
   return (
     <Routes>
       <Route path="/login" element={<AdminLogin />} />
@@ -54,7 +46,12 @@ const AppContent = () => {
           <AdminDashboard />
         </AdminPrivateRoute>
       } />
-      {}
+      <Route path="/dashboard/issue/:id" element={
+        <AdminPrivateRoute>
+          <IssueDetails />
+        </AdminPrivateRoute>
+      } />
+      { }
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
@@ -62,8 +59,7 @@ const AppContent = () => {
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline />
+    <ThemeProvider>
       <Router>
         <AdminAuthProvider>
           <AppContent />

@@ -35,14 +35,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem('janDrishtiUser', JSON.stringify(userData));
     setUser(userData);
 
-    console.log('Profile completed:', userData.profileCompleted);
-    if (!userData.profileCompleted) {
-      console.log('Navigating to profile-update');
-      navigate('/profile-update');
-    } else {
-      console.log('Navigating to dashboard');
-      navigate('/dashboard');
-    }
+    console.log('Navigating to dashboard');
+    navigate('/dashboard');
   };
 
   const logout = () => {
@@ -59,8 +53,16 @@ export const AuthProvider = ({ children }) => {
     });
   };
 
+  const updateUserData = (newData) => {
+    setUser(prev => {
+      const updatedUser = { ...prev, ...newData };
+      localStorage.setItem('janDrishtiUser', JSON.stringify(updatedUser));
+      return updatedUser;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, updateProfileStatus, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfileStatus, updateUserData, loading }}>
       {children}
     </AuthContext.Provider>
   );

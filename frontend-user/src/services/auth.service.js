@@ -1,8 +1,8 @@
 // frontend-user/src/services/auth.service.js
 const API_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
-const register = async (username, password) => {
-  console.log('Auth service - attempting register for:', username);
+const register = async (profileData) => {
+  console.log('Auth service - attempting register for:', profileData.username);
   console.log('Auth service - API URL:', API_URL);
 
   try {
@@ -12,7 +12,7 @@ const register = async (username, password) => {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify(profileData),
     });
 
     console.log('Auth service - response status:', response.status);

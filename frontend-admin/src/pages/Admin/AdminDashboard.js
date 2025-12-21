@@ -1,35 +1,33 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
-  AppBar, Toolbar, Typography, Button, Container, Box, Alert,
-  CircularProgress, Card, CardContent, CardActions, Grid, TextField,
-  MenuItem, Select, InputLabel, FormControl, IconButton, Chip, Modal
-} from '@mui/material';
-import DownloadIcon from '@mui/icons-material/Download';
-import CloseIcon from '@mui/icons-material/Close';
+  Container, Row, Col, Card, Button, Alert, Spinner, Form,
+  Badge, InputGroup, Pagination
+} from 'react-bootstrap';
+import AdminNavbar from '../../components/AdminNavbar';
 import AdminService from '../../services/admin.service';
 import { useAdminAuth } from '../../context/AdminAuthContext';
+import { useTheme } from '../../context/ThemeContext';
 import { socket } from '../../socket';
-import SecurityIcon from '@mui/icons-material/Security'; 
-import LogoutIcon from '@mui/icons-material/Logout'; 
-import SearchIcon from '@mui/icons-material/Search'; 
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
   const { admin, logoutAdmin } = useAdminAuth();
+  const { isDarkMode } = useTheme();
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [statusFilter, setStatusFilter] = useState(''); 
+  const [statusFilter, setStatusFilter] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [tempSearchQuery, setTempSearchQuery] = useState('');
   const [updateMessage, setUpdateMessage] = useState('');
-  const [updateMessageType, setUpdateMessageType] = useState('success');
-  const [animateContent, setAnimateContent] = useState(false); 
-  const [mediaModalOpen, setMediaModalOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState(null);
-  const [downloadingMedia, setDownloadingMedia] = useState(null); 
+
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 12;
 
   const fetchIssues = useCallback(async () => {
     if (!admin || !admin.token) {
-      console.log('No admin or token found'); 
       setError('Admin authentication required. Please log in.');
       setLoading(false);
       logoutAdmin();
@@ -38,15 +36,12 @@ const AdminDashboard = () => {
     setLoading(true);
     setError('');
     try {
-      console.log('Fetching issues with token:', admin.token.substring(0, 20) + '...'); 
       const fetchedIssues = await AdminService.getAllIssues(admin.token, statusFilter, searchQuery);
-      console.log('Successfully fetched issues:', fetchedIssues.length); 
       setIssues(Array.isArray(fetchedIssues) ? fetchedIssues : []);
+      setCurrentPage(1); // Reset to first page on new search/filter
     } catch (err) {
-      console.error('Failed to fetch issues for admin:', err);
-      setError(err.message || 'Failed to load issues. Please try logging out and back in.');
+      setError(err.message || 'Failed to load issues.');
       if (err.message.includes('token') || err.message.includes('Unauthorized') || err.message.includes('expired')) {
-        console.log('Authentication error detected, logging out'); 
         logoutAdmin();
       }
     } finally {
@@ -55,27 +50,20 @@ const AdminDashboard = () => {
   }, [admin, logoutAdmin, statusFilter, searchQuery]);
 
   useEffect(() => {
-    setAnimateContent(true); 
     fetchIssues();
 
     socket.on('new_issue', (newIssue) => {
-      console.log('Admin: Received new issue via WebSocket:', newIssue.issue_id);
       setIssues(prevIssues => [newIssue, ...prevIssues]);
-      setUpdateMessage(`New issue reported: ${newIssue.issue_id} (${newIssue.title})`);
-      setUpdateMessageType('info');
+      setUpdateMessage(`New issue reported: ${newIssue.issue_id}`);
       setTimeout(() => setUpdateMessage(''), 5000);
     });
 
     socket.on('status_updated', (updatedIssue) => {
-      console.log('Admin: Received status update via WebSocket:', updatedIssue.issue_id, updatedIssue.status);
       setIssues(prevIssues =>
         prevIssues.map(issue =>
           issue.id === updatedIssue.id ? { ...issue, status: updatedIssue.status, resolved_at: updatedIssue.resolved_at } : issue
         )
       );
-      setUpdateMessage(`Issue ${updatedIssue.issue_id} status changed to ${updatedIssue.status.toUpperCase()}`);
-      setUpdateMessageType('success');
-      setTimeout(() => setUpdateMessage(''), 5000);
     });
 
     return () => {
@@ -84,499 +72,235 @@ const AdminDashboard = () => {
     };
   }, [fetchIssues]);
 
-  const handleStatusChange = async (issueId, newStatus) => {
-    if (!admin || !admin.token) {
-      setError('Admin authentication required.');
-      logoutAdmin();
-      return;
-    }
-    setUpdateMessage('');
-    try {
-      await AdminService.updateIssueStatus(issueId, newStatus, admin.token);
-    } catch (err) {
-      console.error('Failed to update issue status:', err);
-      setError(err.message || 'Failed to update status.');
-    }
+  const handleSearchSubmit = (e) => {
+    if (e) e.preventDefault();
+    setSearchQuery(tempSearchQuery);
   };
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'open': return 'error';
-      case 'pending': return 'warning';
-      case 'resolved': return 'success';
-      default: return 'default';
-    }
+  const handleOpenMedia = (issueId) => {
+    navigate(`/dashboard/issue/${issueId}`);
   };
 
-  const handleOpenMedia = (mediaPath) => {
-    setSelectedMedia(mediaPath);
-    setMediaModalOpen(true);
+  const statusColors = {
+    OPEN: 'primary',
+    PENDING: 'warning',
+    RESOLVED: 'success',
+    REJECTED: 'danger'
   };
 
-  const handleCloseMedia = () => {
-    setMediaModalOpen(false);
-    setSelectedMedia(null);
-  };
+  const counters = useMemo(() => {
+    return {
+      OPEN: issues.filter(i => i.status.toUpperCase() === 'OPEN').length,
+      PENDING: issues.filter(i => i.status.toUpperCase() === 'PENDING').length,
+      RESOLVED: issues.filter(i => i.status.toUpperCase() === 'RESOLVED').length,
+      REJECTED: issues.filter(i => i.status.toUpperCase() === 'REJECTED').length
+    };
+  }, [issues]);
 
-  const handleDownloadMedia = async (mediaPath) => {
-    setDownloadingMedia(mediaPath);
-    try {
-      const response = await fetch(`http://localhost:5000${mediaPath}`);
-      if (!response.ok) {
-        throw new Error('Failed to download file');
-      }
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = mediaPath.split('/').pop();
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download failed:', error);
-      setError('Failed to download the file. Please try again.');
-    } finally {
-      setDownloadingMedia(null);
-    }
-  };
+  // Removed isOverdue logic as per user request
 
-  const isImage = (path) => {
-    const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp'];
-    return imageExtensions.some(ext => path.toLowerCase().endsWith(ext));
-  };
-
-  const isVideo = (path) => {
-    const videoExtensions = ['.mp4', '.avi', '.mov', '.wmv', '.flv', '.webm', '.mkv'];
-    return videoExtensions.some(ext => path.toLowerCase().endsWith(ext));
-  };
+  // Pagination Logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = issues.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(issues.length / itemsPerPage);
 
   if (loading && issues.length === 0) {
     return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
-      }}>
-        <CircularProgress size={60} sx={{ color: 'primary.main' }} />
-        <Typography variant="h6" sx={{ mt: 2, color: 'primary.dark' }}>Loading all issues...</Typography>
-      </Box>
+      <div className="d-flex justify-content-center align-items-center vh-100 flex-column" style={{ background: isDarkMode ? '#1a1d21' : '#f8fafc' }}>
+        <Spinner animation="grow" variant="primary" />
+        <h6 className="mt-3 text-primary text-uppercase tracking-widest">Loading Dashboard...</h6>
+      </div>
     );
   }
 
   return (
-    <Box sx={{
-      flexGrow: 1,
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Animated gradient circles for background effect */}
-      <Box sx={{
-        position: 'absolute',
-        top: '-100px',
-        left: '-100px',
-        width: '300px',
-        height: '300px',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, #90caf9 0%, #e0e7ff 80%)',
-        opacity: 0.4,
-        zIndex: 0,
-        filter: 'blur(30px)',
-        animation: 'float 8s ease-in-out infinite',
-        '@keyframes float': {
-          '0%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(40px)' },
-          '100%': { transform: 'translateY(0)' },
-        },
-      }} />
-      <Box sx={{
-        position: 'absolute',
-        bottom: '-120px',
-        right: '-120px',
-        width: '350px',
-        height: '350px',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, #f48fb1 0%, #f5f7fa 80%)',
-        opacity: 0.3,
-        zIndex: 0,
-        filter: 'blur(40px)',
-        animation: 'float2 10s ease-in-out infinite',
-        '@keyframes float2': {
-          '0%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-30px)' },
-          '100%': { transform: 'translateY(0)' },
-        },
-      }} />
+    <div className="min-vh-100 d-flex flex-column" style={{ background: isDarkMode ? '#121417' : '#f1f5f9' }}>
+      <AdminNavbar />
 
-      <AppBar position="sticky" sx={{
-        bgcolor: 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(10px)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        zIndex: 2,
-      }}>
-        <Toolbar>
-          <SecurityIcon sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.dark' }}>
-            Jan Drishti - Admin Dashboard - Welcome {admin?.username}
-          </Typography>
-          <Button
-            color="inherit"
-            onClick={logoutAdmin}
-            startIcon={<LogoutIcon />}
-            sx={{
-              color: 'text.secondary',
-              borderColor: 'text.secondary',
-              '&:hover': {
-                color: 'error.main',
-                borderColor: 'error.main',
-              },
-            }}
-          >
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
+      <Container fluid className="py-4 px-lg-5" data-aos="fade-in">
+        {/* Compressed Header Section */}
+        <div className={`d-flex justify-content-between align-items-center mb-4 border-bottom pb-3 ${isDarkMode ? 'border-secondary' : ''}`}>
+          <div>
+            <h3 className={`fw-bold mb-0 ${isDarkMode ? 'text-white' : 'text-dark'}`} style={{ fontSize: '1.5rem' }}>
+              Admin Dashboard
+            </h3>
+            <p className="text-muted mb-0" style={{ fontSize: '0.9rem' }}>
+              Welcome back, <span className="text-primary fw-semibold">{admin?.username?.replace(/\b\w/g, l => l.toUpperCase())}</span>
+            </p>
+          </div>
 
-      <Container maxWidth="xl" sx={{
-        mt: 4,
-        mb: 4,
-        zIndex: 1,
-        opacity: animateContent ? 1 : 0,
-        transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'opacity 1s ease-out, transform 1s ease-out',
-      }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.dark', textAlign: 'center', mb: 4 }}>
-          All Reported Issues
-        </Typography>
+          {/* Status Summaries */}
+          <div className="d-flex gap-2">
+            {Object.entries(counters).map(([status, count], index) => (
+              <div
+                key={status}
+                className={`px-3 py-2 rounded shadow-sm border-start border-4 border-${statusColors[status]} ${isDarkMode ? 'bg-dark text-white' : 'bg-white text-dark'}`}
+                data-aos="fade-down"
+                data-aos-delay={index * 100}
+              >
+                <div className="text-muted text-uppercase fw-bold" style={{ fontSize: '0.65rem' }}>{status}</div>
+                <div className="h5 mb-0 fw-bold">{count}</div>
+              </div>
+            ))}
+          </div>
+        </div>
 
-        {updateMessage && (
-          <Alert severity={updateMessageType} sx={{ mb: 3, borderRadius: 2 }}>
-            {updateMessage}
-          </Alert>
-        )}
-        {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
+        {updateMessage && <Alert variant="info" className="py-2 small shadow-sm mb-3">{updateMessage}</Alert>}
+        {error && <Alert variant="danger" className="py-2 small shadow-sm mb-3">{error}</Alert>}
 
-        <Box sx={{
-          display: 'flex',
-          gap: 2,
-          mb: 4,
-          p: 2,
-          bgcolor: 'rgba(255,255,255,0.7)',
-          backdropFilter: 'blur(8px)',
-          borderRadius: 4,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          alignItems: 'center',
-          flexWrap: 'wrap'
-        }}>
-          <FormControl sx={{ minWidth: 150 }} size="small">
-            <InputLabel id="status-filter-label" sx={{ fontWeight: 'medium' }}>Filter by Status</InputLabel>
-            <Select
-              labelId="status-filter-label"
-              id="status-filter"
-              value={statusFilter}
-              label="Filter by Status"
-              onChange={(e) => setStatusFilter(e.target.value)}
-              sx={{ borderRadius: 2 }}
-            >
-              <MenuItem value="">All</MenuItem>
-              <MenuItem value="open">Open</MenuItem>
-              <MenuItem value="pending">Pending</MenuItem>
-              <MenuItem value="resolved">Resolved</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label="Search by Issue ID or Title/Description"
-            variant="outlined"
-            size="small"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => { if (e.key === 'Enter') fetchIssues(); }}
-            sx={{ flexGrow: 1, maxWidth: 400 }}
-            InputProps={{
-              sx: { borderRadius: 2 }
-            }}
-            InputLabelProps={{
-              sx: { fontWeight: 'medium' }
-            }}
-          />
-          <Button
-            variant="contained"
-            onClick={fetchIssues}
-            startIcon={<SearchIcon />}
-            sx={{
-              borderRadius: 3,
-              fontWeight: 'bold',
-              bgcolor: 'secondary.main',
-              '&:hover': {
-                bgcolor: 'secondary.dark',
-                boxShadow: 3,
-              },
-            }}
-          >
-            Apply Filter/Search
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => { setStatusFilter(''); setSearchQuery(''); fetchIssues(); }}
-            sx={{
-              borderRadius: 3,
-              fontWeight: 'bold',
-              borderColor: 'text.secondary',
-              color: 'text.secondary',
-              '&:hover': {
-                borderColor: 'primary.main',
-                color: 'primary.main',
-                bgcolor: 'action.hover',
-              },
-            }}
-          >
-            Clear Filters
-          </Button>
-        </Box>
-
-        {issues.length === 0 && !loading && !error && (
-          <Typography variant="h6" color="text.secondary" align="center" sx={{ mt: 5 }}>
-            No issues found matching your criteria.
-          </Typography>
-        )}
-
-        <Grid container spacing={3}>
-          {issues.map((issue) => (
-            <Grid item xs={12} sm={6} lg={4} key={issue.id}>
-              <Card sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 6px 20px rgba(0,0,0,0.08)',
-                borderRadius: 4,
-                transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                },
-              }}>
-                <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                    <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-                      Issue ID: {issue.issue_id}
-                    </Typography>
-                    <Chip label={issue.status.toUpperCase()} color={getStatusColor(issue.status)} size="small" sx={{ fontWeight: 'bold' }} />
-                  </Box>
-                  <Typography variant="h6" component="div" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.dark' }}>
-                    {issue.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    <strong>Description:</strong> {issue.description}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Location:</strong> {issue.location}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Date of Occurrence:</strong> {new Date(issue.date_of_occurrence).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                    <strong>Reported by:</strong> {issue.full_name || 'N/A'} (Type: {issue.user_type} {issue.user_type_custom ? `(${issue.user_type_custom})` : ''})
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Contact:</strong> {issue.phone_number || 'N/A'}, {issue.address || 'N/A'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Reported On:</strong> {new Date(issue.created_at).toLocaleString()}
-                  </Typography>
-                  {issue.resolved_at && (
-                    <Typography variant="body2" color="text.secondary">
-                      <strong>Resolved On:</strong> {new Date(issue.resolved_at).toLocaleString()}
-                    </Typography>
-                  )}
-                  {issue.media_paths && issue.media_paths.length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1, fontWeight: 'medium' }}>
-                        <strong>Attached Media ({issue.media_paths.length}):</strong>
-                      </Typography>
-                      <Grid container spacing={1}>
-                        {issue.media_paths.map((mediaPath, index) => (
-                          <Grid item xs={6} sm={4} key={index}>
-                            <Box sx={{ position: 'relative', borderRadius: 1, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
-                              {isImage(mediaPath) ? (
-                                <img
-                                  src={`http://localhost:5000${mediaPath}`}
-                                  alt={`Media ${index + 1}`}
-                                  style={{
-                                    width: '100%',
-                                    height: '80px',
-                                    objectFit: 'cover',
-                                    cursor: 'pointer',
-                                    display: 'block'
-                                  }}
-                                  onClick={() => handleOpenMedia(mediaPath)}
-                                />
-                              ) : isVideo(mediaPath) ? (
-                                <video
-                                  src={`http://localhost:5000${mediaPath}`}
-                                  style={{
-                                    width: '100%',
-                                    height: '80px',
-                                    objectFit: 'cover',
-                                    cursor: 'pointer',
-                                    display: 'block'
-                                  }}
-                                  onClick={() => handleOpenMedia(mediaPath)}
-                                  muted
-                                />
-                              ) : (
-                                <Box
-                                  sx={{
-                                    width: '100%',
-                                    height: '80px',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
-                                    bgcolor: 'grey.100',
-                                    cursor: 'pointer'
-                                  }}
-                                  onClick={() => handleOpenMedia(mediaPath)}
-                                >
-                                  <Typography variant="caption" color="text.secondary">
-                                    File
-                                  </Typography>
-                                </Box>
-                              )}
-                              <IconButton
-                                size="small"
-                                disabled={downloadingMedia === mediaPath}
-                                sx={{
-                                  position: 'absolute',
-                                  top: 2,
-                                  right: 2,
-                                  bgcolor: 'rgba(255,255,255,0.8)',
-                                  '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' },
-                                  '&.Mui-disabled': {
-                                    bgcolor: 'rgba(255,255,255,0.6)',
-                                  }
-                                }}
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleDownloadMedia(mediaPath);
-                                }}
-                              >
-                                <DownloadIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </Grid>
-                        ))}
-                      </Grid>
-                    </Box>
-                  )}
-                </CardContent>
-                <CardActions sx={{ justifyContent: 'flex-start', p: 2, pt: 0 }}>
-                  <FormControl size="small" sx={{ minWidth: 140 }}>
-                    <InputLabel id={`status-select-label-${issue.id}`} sx={{ fontWeight: 'medium' }}>Update Status</InputLabel>
-                    <Select
-                      labelId={`status-select-label-${issue.id}`}
-                      id={`status-select-${issue.id}`}
-                      value={issue.status}
-                      label="Update Status"
-                      onChange={(e) => handleStatusChange(issue.id, e.target.value)}
-                      sx={{ borderRadius: 2 }}
-                    >
-                      <MenuItem value="open">Open</MenuItem>
-                      <MenuItem value="pending">Pending</MenuItem>
-                      <MenuItem value="resolved">Resolved</MenuItem>
-                    </Select>
-                  </FormControl>
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      </Container>
-
-      <Modal
-        open={mediaModalOpen}
-        onClose={handleCloseMedia}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          p: 2
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: '90vw',
-            maxHeight: '90vh',
-            bgcolor: 'background.paper',
-            borderRadius: 2,
-            boxShadow: 24,
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-        >
-          <IconButton
-            onClick={handleCloseMedia}
-            sx={{
-              position: 'absolute',
-              top: 8,
-              right: 8,
-              zIndex: 1,
-              bgcolor: 'rgba(255,255,255,0.8)',
-              '&:hover': { bgcolor: 'rgba(255,255,255,0.9)' }
-            }}
-          >
-            <CloseIcon />
-          </IconButton>
-          {selectedMedia && (
-            <Box sx={{ p: 1 }}>
-              {isImage(selectedMedia) ? (
-                <img
-                  src={`http://localhost:5000${selectedMedia}`}
-                  alt="Full size media"
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '85vh',
-                    objectFit: 'contain',
-                    display: 'block'
-                  }}
-                />
-              ) : isVideo(selectedMedia) ? (
-                <video
-                  src={`http://localhost:5000${selectedMedia}`}
-                  controls
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '85vh',
-                    display: 'block'
-                  }}
-                />
-              ) : (
-                <Box sx={{ p: 4, textAlign: 'center' }}>
-                  <Typography variant="h6" color="text.secondary">
-                    Unsupported file type
-                  </Typography>
-                  <Button
-                    variant="contained"
-                    startIcon={<DownloadIcon />}
-                    disabled={downloadingMedia === selectedMedia}
-                    onClick={() => handleDownloadMedia(selectedMedia)}
-                    sx={{ mt: 2 }}
+        {/* Improved Filters & Search Bar */}
+        <Card className={`mb-4 border-0 shadow-sm overflow-hidden ${isDarkMode ? 'bg-dark' : ''}`} data-aos="fade-up">
+          <Card.Body className="p-3">
+            <Form onSubmit={handleSearchSubmit}>
+              <Row className="g-2 align-items-center">
+                <Col md={3}>
+                  <Form.Select
+                    size="sm"
+                    className={`border-0 ${isDarkMode ? 'bg-secondary text-white' : 'bg-light text-dark'}`}
+                    style={{ colorScheme: isDarkMode ? 'dark' : 'light' }}
+                    value={statusFilter}
+                    onChange={(e) => setStatusFilter(e.target.value)}
                   >
-                    {downloadingMedia === selectedMedia ? 'Downloading...' : 'Download File'}
+                    <option value="">All Statuses</option>
+                    <option value="OPEN" className={isDarkMode ? 'bg-dark text-white' : ''}>Open</option>
+                    <option value="PENDING" className={isDarkMode ? 'bg-dark text-white' : ''}>Pending</option>
+                    <option value="RESOLVED" className={isDarkMode ? 'bg-dark text-white' : ''}>Resolved</option>
+                    <option value="REJECTED" className={isDarkMode ? 'bg-dark text-white' : ''}>Rejected</option>
+                  </Form.Select>
+                </Col>
+                <Col md={6}>
+                  <InputGroup size="sm">
+                    <Form.Control
+                      type="text"
+                      className={`border-0 ${isDarkMode ? 'bg-secondary text-white' : 'bg-light text-dark'}`}
+                      style={{
+                        '::placeholder': { color: isDarkMode ? '#ccc' : '#6c757d' }
+                      }}
+                      placeholder="Search by ID, Title, or Description..."
+                      value={tempSearchQuery}
+                      onChange={(e) => setTempSearchQuery(e.target.value)}
+                    />
+                    <Button variant="primary" type="submit">
+                      Search
+                    </Button>
+                  </InputGroup>
+                </Col>
+                <Col md={3} className="d-flex gap-2 text-end">
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    className="flex-grow-1 border-0"
+                    onClick={() => { setTempSearchQuery(''); setSearchQuery(''); setStatusFilter(''); fetchIssues(); }}
+                  >
+                    <i className="bi bi-x-circle me-1"></i> Clear
                   </Button>
-                </Box>
-              )}
-            </Box>
-          )}
-        </Box>
-      </Modal>
-    </Box>
+                  <Button
+                    variant="outline-primary"
+                    size="sm"
+                    className="flex-grow-1 border-0"
+                    onClick={fetchIssues}
+                    disabled={loading}
+                  >
+                    <i className="bi bi-arrow-clockwise"></i> Refresh
+                  </Button>
+                </Col>
+              </Row>
+            </Form>
+          </Card.Body>
+        </Card>
+
+        {/* Issue Cards Grid */}
+        {issues.length === 0 ? (
+          <div className={`text-center py-5 rounded shadow-sm ${isDarkMode ? 'bg-dark text-white border border-secondary' : 'bg-white text-muted'}`}>
+            <i className="bi bi-inbox display-4"></i>
+            <p className="mt-3">No issues found matching your criteria</p>
+          </div>
+        ) : (
+          <>
+            <Row className="g-4">
+              {currentItems.map((issue) => (
+                <Col key={issue.id} md={6} lg={4} xl={3}>
+                  <Card className={`h-100 border-0 shadow-sm position-relative overflow-hidden issue-card-hover ${isDarkMode ? 'bg-dark text-white pt-4' : 'bg-white text-dark pt-4'}`} style={{ transition: 'transform 0.2s' }}>
+                    <Card.Body className="d-flex flex-column pt-3">
+                      <div className="position-absolute top-0 end-0 p-2 d-flex flex-column align-items-end gap-1">
+                        <Badge bg={statusColors[issue.status.toUpperCase()]} className="text-uppercase" style={{ fontSize: '0.7rem' }}>
+                          {issue.status}
+                        </Badge>
+                        <small className="text-muted fw-bold" style={{ fontSize: '0.65rem' }}>ID: {issue.id}</small>
+                      </div>
+
+                      <Card.Title className="fw-bold mb-2 pe-5" style={{ fontSize: '1.05rem', lineHeight: '1.3' }}>
+                        {issue.title}
+                      </Card.Title>
+
+                      <Card.Text className="text-muted mb-4 flex-grow-1" style={{ fontSize: '0.85rem', opacity: '0.8' }}>
+                        {issue.description.length > 90 ? `${issue.description.substring(0, 90)}...` : issue.description}
+                      </Card.Text>
+
+                      <div className="mt-auto border-top pt-3 border-secondary">
+                        <div className="d-flex align-items-center mb-2" style={{ fontSize: '0.8rem' }}>
+                          <i className="bi bi-person-circle text-primary me-2"></i>
+                          <span className={`${isDarkMode ? 'text-light' : 'text-dark'} fw-medium text-truncate`}>{issue.full_name || 'Anonymous'}</span>
+                        </div>
+                        <div className="d-flex align-items-center mb-2" style={{ fontSize: '0.8rem' }}>
+                          <i className="bi bi-calendar3 text-muted me-2"></i>
+                          <span className="text-muted">{new Date(issue.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                        </div>
+                        <div className="d-flex align-items-center mb-3" style={{ fontSize: '0.8rem' }}>
+                          <i className="bi bi-geo-alt text-danger me-2"></i>
+                          <span className="text-muted text-truncate">{issue.location}</span>
+                        </div>
+
+                        <Button
+                          variant={isDarkMode ? "outline-primary" : "primary"}
+                          className={`w-100 rounded-pill btn-sm fw-bold shadow-sm py-2 ${isDarkMode ? 'border-2' : ''}`}
+                          onClick={() => handleOpenMedia(issue.id)}
+                        >
+                          View Details
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="d-flex justify-content-center mt-5">
+                <Pagination size="sm">
+                  <Pagination.First onClick={() => setCurrentPage(1)} disabled={currentPage === 1} />
+                  <Pagination.Prev onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1} />
+                  {[...Array(totalPages)].map((_, i) => (
+                    <Pagination.Item
+                      key={i + 1}
+                      active={i + 1 === currentPage}
+                      onClick={() => setCurrentPage(i + 1)}
+                    >
+                      {i + 1}
+                    </Pagination.Item>
+                  ))}
+                  <Pagination.Next onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages} />
+                  <Pagination.Last onClick={() => setCurrentPage(totalPages)} disabled={currentPage === totalPages} />
+                </Pagination>
+              </div>
+            )}
+          </>
+        )}
+      </Container>
+      <style>
+        {`
+          .issue-card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important;
+          }
+          .tracking-widest {
+            letter-spacing: 0.1em;
+          }
+        `}
+      </style>
+    </div>
   );
 };
 

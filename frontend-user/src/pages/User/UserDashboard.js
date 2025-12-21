@@ -1,47 +1,38 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  AppBar, Toolbar, Typography, Button, Container, Box, Alert,
-  CircularProgress, Card, CardContent, CardActions, Grid, TextField,
-  Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle
-} from '@mui/material';
-import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
-import SearchIcon from '@mui/icons-material/Search';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
-import LogoutIcon from '@mui/icons-material/Logout';
-import EngineeringIcon from '@mui/icons-material/Engineering';
+import { Container, Row, Col, Card, Button, Spinner, Modal, Form, InputGroup } from 'react-bootstrap';
 import { useAuth } from '../../context/AuthContext';
+import BackButton from '../../components/BackButton';
 import IssueService from '../../services/issue.service';
 import { socket } from '../../socket';
+import { useTheme } from '../../context/ThemeContext';
+import toast from 'react-hot-toast';
 
 const UserDashboard = () => {
   const { user, logout } = useAuth();
+  const { isDarkMode } = useTheme();
   const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [issueToDelete, setIssueToDelete] = useState(null);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('success');
   const [animateContent, setAnimateContent] = useState(false);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   const fetchIssues = useCallback(async () => {
     if (!user || !user.token || !user.id) {
-      setError('Authentication required. Please log in.');
+      toast.error('Authentication required. Please log in.');
       setLoading(false);
       logout();
       return;
     }
     setLoading(true);
-    setError('');
     try {
       const fetchedIssues = await IssueService.getUserIssues(user.id, user.token);
       setIssues(fetchedIssues);
     } catch (err) {
       console.error('Failed to fetch user issues:', err);
-      setError(err.message || 'Failed to load your issues.');
+      toast.error(err.message || 'Failed to load your issues.');
       if (err.message.includes('token') || err.message.includes('Unauthorized')) {
         logout();
       }
@@ -76,18 +67,17 @@ const UserDashboard = () => {
       return;
     }
     setLoading(true);
-    setError('');
     try {
       const result = await IssueService.searchUserIssue(searchQuery, user.token);
       if (result) {
         setIssues([result]);
       } else {
         setIssues([]);
-        setError('Issue not found.');
+        toast.error('Issue not found.');
       }
     } catch (err) {
       console.error('Search issue error:', err);
-      setError(err.message || 'Issue not found.');
+      toast.error(err.message || 'Issue not found.');
       setIssues([]);
     } finally {
       setLoading(false);
@@ -107,15 +97,13 @@ const UserDashboard = () => {
   const handleDeleteIssue = async () => {
     if (!issueToDelete || !user || !user.token) return;
     setLoading(true);
-    setError('');
     try {
       await IssueService.deleteIssue(issueToDelete.id, user.token);
       setIssues(issues.filter(issue => issue.id !== issueToDelete.id));
-      setMessage('Issue deleted successfully!');
-      setMessageType('success');
+      toast.success('Issue deleted successfully!');
     } catch (err) {
       console.error('Delete issue error:', err);
-      setError(err.message || 'Failed to delete issue.');
+      toast.error(err.message || 'Failed to delete issue.');
     } finally {
       setLoading(false);
       closeDeleteDialog();
@@ -124,333 +112,286 @@ const UserDashboard = () => {
 
   if (loading && issues.length === 0) {
     return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
-      }}>
-        <CircularProgress size={60} sx={{ color: 'primary.main' }} />
-        <Typography variant="h6" sx={{ mt: 2, color: 'primary.dark' }}>Loading issues...</Typography>
-      </Box>
+      <div className="d-flex flex-column">
+        <Container className="flex-grow-1 d-flex align-items-center justify-content-center py-5">
+          <div className="text-center">
+            <Spinner animation="border" variant="primary" size="lg" />
+            <h5 className="mt-3 text-primary">Loading issues...</h5>
+          </div>
+        </Container>
+      </div>
     );
   }
 
   return (
-    <Box sx={{
-      flexGrow: 1,
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
-      position: 'relative',
-      overflow: 'hidden',
-    }}>
-      {/* Animated gradient circles for background effect */}
-      <Box sx={{
+    <div className="position-relative overflow-hidden">
+      {/* Animated background elements */}
+      <div style={{
         position: 'absolute',
         top: '-100px',
         left: '-100px',
         width: '300px',
         height: '300px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, #90caf9 0%, #e0e7ff 80%)',
-        opacity: 0.4,
+        background: 'radial-gradient(circle, rgba(30, 58, 138, 0.1) 0%, rgba(248, 250, 252, 0.8) 80%)',
         zIndex: 0,
         filter: 'blur(30px)',
-        animation: 'float 8s ease-in-out infinite',
-        '@keyframes float': {
-          '0%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(40px)' },
-          '100%': { transform: 'translateY(0)' },
-        },
+        animation: 'float 8s ease-in-out infinite'
       }} />
-      <Box sx={{
+      <div style={{
         position: 'absolute',
         bottom: '-120px',
         right: '-120px',
         width: '350px',
         height: '350px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, #f48fb1 0%, #f5f7fa 80%)',
-        opacity: 0.3,
+        background: 'radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, rgba(248, 250, 252, 0.8) 80%)',
         zIndex: 0,
         filter: 'blur(40px)',
-        animation: 'float2 10s ease-in-out infinite',
-        '@keyframes float2': {
-          '0%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-30px)' },
-          '100%': { transform: 'translateY(0)' },
-        },
+        animation: 'float2 10s ease-in-out infinite'
       }} />
 
-      <AppBar position="sticky" sx={{
-        bgcolor: 'rgba(255, 255, 255, 0.8)',
-        backdropFilter: 'blur(10px)',
-        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-        zIndex: 2,
-      }}>
-        <Toolbar>
-          <EngineeringIcon sx={{ mr: 1, color: 'primary.main' }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, fontWeight: 'bold', color: 'primary.dark' }}>
-            Jan Drishti - Welcome {user?.username}
-          </Typography>
-          <Button
-            color="inherit"
-            component={Link}
-            to="/report-issue"
-            startIcon={<AddCircleOutlineIcon />}
-            sx={{
-              bgcolor: 'primary.main',
-              color: 'white',
-              borderRadius: 3,
-              fontWeight: 'bold',
-              mr: 2,
-              '&:hover': {
-                bgcolor: 'primary.dark',
-                boxShadow: 3,
-              },
-            }}
-          >
-            Report New Issue
-          </Button>
-          <Button
-            color="inherit"
-            onClick={logout}
-            startIcon={<LogoutIcon />}
-            sx={{
-              color: 'text.secondary',
-              borderColor: 'text.secondary',
-              '&:hover': {
-                color: 'error.main',
-                borderColor: 'error.main',
-              },
-            }}
-          >
-            Logout
-          </Button>
-        </Toolbar>
-      </AppBar>
+      <style>
+        {`
+          @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(40px); }
+            100% { transform: translateY(0); }
+          }
+          @keyframes float2 {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+          }
+        `}
+      </style>
 
-      <Container maxWidth="lg" sx={{
-        mt: 4,
-        mb: 4,
+      <Container className="flex-grow-1 py-4" style={{
         zIndex: 1,
         opacity: animateContent ? 1 : 0,
         transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'opacity 1s ease-out, transform 1s ease-out',
+        transition: 'opacity 1s ease-out, transform 1s ease-out'
       }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.dark', textAlign: 'center', mb: 4 }}>
-          Your Reported Issues
-        </Typography>
+        <BackButton />
 
-        <Box sx={{
-          display: 'flex',
-          gap: 2,
-          mb: 4,
-          p: 2,
-          bgcolor: 'rgba(255,255,255,0.7)',
-          backdropFilter: 'blur(8px)',
-          borderRadius: 4,
-          boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-          alignItems: 'center',
-        }}>
-          <TextField
-            label="Search by Issue ID (e.g., JDR-YYYYMMDD-XXXX)"
-            variant="outlined"
-            size="small"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}
-            sx={{ flexGrow: 1 }}
-            InputProps={{
-              sx: { borderRadius: 2 }
-            }}
-            InputLabelProps={{
-              sx: { fontWeight: 'medium' }
-            }}
-          />
-          <Button
-            variant="contained"
-            onClick={handleSearch}
-            startIcon={<SearchIcon />}
-            sx={{
-              borderRadius: 3,
-              fontWeight: 'bold',
-              bgcolor: 'secondary.main',
-              '&:hover': {
-                bgcolor: 'secondary.dark',
-                boxShadow: 3,
-              },
+        <div className="text-center mb-4 mt-2">
+          <h2 className="display-6 fw-semibold mb-2" style={{ color: 'var(--primary-text)' }}>
+            Your Reported Issues
+          </h2>
+          <p className="text-muted fs-5 mx-auto text-container-md opacity-75">
+            Manage your reports, track their resolution progress, and keep updated on community improvements.
+          </p>
+        </div>
+
+        <div className="mx-auto mb-5" style={{ maxWidth: '600px' }}>
+          <InputGroup
+            className="shadow-sm overflow-hidden"
+            style={{
+              borderRadius: '8px',
+              border: isSearchFocused
+                ? '1px solid var(--primary-color)'
+                : (isDarkMode ? '1px solid rgba(255,255,255,0.15)' : '1px solid rgba(0,0,0,0.1)'),
+              boxShadow: isSearchFocused
+                ? (isDarkMode ? '0 0 12px rgba(96, 165, 250, 0.2)' : '0 0 12px rgba(37, 99, 235, 0.1)')
+                : 'none',
+              height: '42px',
+              transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            Search
-          </Button>
-          <Button
-            variant="outlined"
-            onClick={() => { setSearchQuery(''); fetchIssues(); }}
-            sx={{
-              borderRadius: 3,
-              fontWeight: 'bold',
-              borderColor: 'text.secondary',
-              color: 'text.secondary',
-              '&:hover': {
-                borderColor: 'primary.main',
-                color: 'primary.main',
-                bgcolor: 'action.hover',
-              },
-            }}
-          >
-            Clear Search
-          </Button>
-        </Box>
+            <InputGroup.Text className={`${isDarkMode ? 'bg-dark border-0' : 'bg-white border-0'} py-0 ps-3 transition-all`}
+              style={{ color: isSearchFocused ? 'var(--primary-color)' : 'var(--text-muted)' }}
+            >
+              <i className={`bi bi-search fs-6 ${isSearchFocused ? 'scale-110' : ''}`} style={{ transition: 'all 0.3s ease' }}></i>
+            </InputGroup.Text>
+            <Form.Control
+              type="text"
+              placeholder="Search Issue ID..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => { if (e.key === 'Enter') handleSearch(); }}
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              className={`${isDarkMode ? 'bg-dark text-light border-0' : 'bg-white border-0'} py-0 px-2 fs-6`}
+              style={{ boxShadow: 'none', height: '40px' }}
+            />
+            {searchQuery && (
+              <Button
+                variant="link"
+                onClick={() => { setSearchQuery(''); fetchIssues(); }}
+                className="text-decoration-none text-muted px-2 py-0 d-flex align-items-center opacity-75 hover-opacity-100 transition-all"
+                title="Clear Search"
+                style={{ height: '40px', fontSize: '0.9rem' }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.opacity = '1'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = ''; e.currentTarget.style.opacity = '0.75'; }}
+              >
+                Clear
+              </Button>
+            )}
+            <Button
+              variant="primary"
+              onClick={handleSearch}
+              className="px-3 fw-bold d-flex align-items-center transition-bounce"
+              disabled={loading}
+              style={{
+                height: '40px',
+                borderTopLeftRadius: '0',
+                borderBottomLeftRadius: '0',
+                fontSize: '0.9rem',
+                zIndex: 2
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
+            >
+              Search
+            </Button>
+          </InputGroup>
+        </div>
 
-        {error && <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>{error}</Alert>}
-        {message && <Alert severity={messageType} sx={{ mb: 3, borderRadius: 2 }}>{message}</Alert>}
 
-        {issues.length === 0 && !loading && !error && (
-          <Typography variant="h6" color="text.secondary" align="center" sx={{ mt: 5 }}>
-            No issues reported yet. Click "Report New Issue" to get started!
-          </Typography>
+
+        {issues.length === 0 && !loading && (
+          <div className="text-center py-4 my-4">
+            <div className="mb-4 d-inline-block p-4 rounded-circle bg-primary bg-opacity-10">
+              <i className="bi bi-clipboard-x display-1 text-primary opacity-50"></i>
+            </div>
+            <h3 className="fw-bold text-muted mb-2">No Issues Reported Yet</h3>
+            <p className="text-muted mb-4 fs-5 mx-auto opacity-75" style={{ maxWidth: '500px' }}>
+              It looks like you haven't reported any community issues. Be the change-maker today!
+            </p>
+            <Button as={Link} to="/report-issue" variant="primary" size="lg" className="px-5 py-3 fw-bold rounded-pill shadow-lg transition-bounce">
+              <i className="bi bi-plus-circle me-2"></i>
+              Report Your First Issue
+            </Button>
+          </div>
         )}
 
-        <Grid container spacing={3}>
-          {issues.map((issue) => (
-            <Grid item xs={12} sm={6} md={4} key={issue.id}>
-              <Card sx={{
-                height: '100%',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 6px 20px rgba(0,0,0,0.08)',
-                borderRadius: 4,
+        <Row>
+          {issues.map((issue, index) => (
+            <Col xs={12} sm={6} md={4} key={issue.id} className="mb-4" data-aos="fade-up" data-aos-delay={index * 50}>
+              <Card className="h-100 shadow-sm" style={{
                 transition: 'transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out',
-                '&:hover': {
-                  transform: 'translateY(-5px)',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.15)',
-                },
-              }}>
-                <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1, fontSize: '0.85rem' }}>
-                    Reported on: {new Date(issue.created_at).toLocaleDateString()}
-                  </Typography>
-                  <Typography variant="h6" component="div" sx={{ mb: 1, fontWeight: 'bold', color: 'primary.dark' }}>
+                border: 'none',
+                borderRadius: '16px'
+              }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-5px)';
+                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(0,0,0,0.15)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+                }}>
+                <Card.Body className="d-flex flex-column">
+                  <div className="d-flex justify-content-between align-items-start mb-3">
+                    <span className={`badge rounded-pill px-3 py-2 ${issue.status === 'resolved' ? 'bg-success bg-opacity-10 text-success border border-success border-opacity-25' :
+                      issue.status === 'pending' ? 'bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25' :
+                        'bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25'
+                      }`}>
+                      {issue.status.toUpperCase()}
+                    </span>
+                    <small className="text-muted">
+                      {new Date(issue.created_at).toLocaleDateString()}
+                    </small>
+                  </div>
+
+                  <Card.Title className="fw-bold mb-3 fs-4" style={{ color: 'var(--primary-text)' }}>
                     {issue.title}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
-                    ID: {issue.issue_id}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    Location: {issue.location}
-                  </Typography>
-                  <Typography variant="body1" sx={{ mt: 1, fontWeight: 'bold' }}>
-                    Status: <Box component="span" sx={{
-                      color: issue.status === 'resolved' ? 'success.main' : issue.status === 'pending' ? 'warning.main' : 'error.main',
-                      textTransform: 'uppercase',
-                    }}>
-                      {issue.status}
-                    </Box>
-                  </Typography>
+                  </Card.Title>
+
+                  <div className="flex-grow-1">
+                    <p className="text-muted small mb-2 d-flex align-items-center">
+                      <i className="bi bi-hash me-2"></i>
+                      {issue.issue_id}
+                    </p>
+                    <p className="text-muted small mb-3 d-flex align-items-center">
+                      <i className="bi bi-geo-alt me-2 text-primary"></i>
+                      {issue.location}
+                    </p>
+                  </div>
+
                   {issue.resolved_at && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
-                      Resolved On: {new Date(issue.resolved_at).toLocaleDateString()}
-                    </Typography>
+                    <div className="alert alert-success py-2 px-3 small d-flex align-items-center mb-3">
+                      <i className="bi bi-check2-circle me-2"></i>
+                      Resolved: {new Date(issue.resolved_at).toLocaleDateString()}
+                    </div>
                   )}
                   {issue.media_path && (
-                    <Box sx={{ mt: 2, textAlign: 'center' }}>
+                    <div className="text-center mt-3">
                       <img
                         src={`http://localhost:5000${issue.media_path}`}
                         alt="Issue Media"
-                        style={{ maxWidth: '100%', maxHeight: '180px', objectFit: 'cover', borderRadius: '8px', boxShadow: '0 2px 5px rgba(0,0,0,0.1)' }}
-                      />
-                    </Box>
-                  )}
-                </CardContent>
-                <CardActions sx={{ justifyContent: 'flex-end', p: 2, pt: 0 }}>
-                  {issue.status === 'open' ? (
-                    <>
-                      <Button
-                        size="small"
-                        startIcon={<EditIcon />}
-                        component={Link}
-                        to={`/edit-issue/${issue.id}`}
-                        sx={{
-                          color: 'primary.main',
-                          fontWeight: 'bold',
-                          '&:hover': { bgcolor: 'primary.light' },
+                        className="img-fluid rounded"
+                        style={{
+                          maxHeight: '180px',
+                          objectFit: 'cover',
+                          boxShadow: '0 2px 5px rgba(0,0,0,0.1)',
+                          borderRadius: '8px'
                         }}
+                      />
+                    </div>
+                  )}
+                </Card.Body>
+                <Card.Footer className="bg-transparent border-0 pt-0">
+                  {issue.status.toLowerCase() === 'open' ? (
+                    <div className="d-flex justify-content-end gap-2">
+                      <Button
+                        as={Link}
+                        to={`/edit-issue/${issue.id}`}
+                        variant="outline-primary"
+                        size="sm"
+                        className="d-flex align-items-center fw-bold"
                       >
+                        <i className="bi bi-pencil me-1"></i>
                         Edit
                       </Button>
                       <Button
-                        size="small"
-                        color="error"
-                        startIcon={<DeleteIcon />}
+                        variant="outline-danger"
+                        size="sm"
+                        className="d-flex align-items-center fw-bold"
                         onClick={() => openDeleteDialog(issue)}
-                        sx={{
-                          fontWeight: 'bold',
-                          '&:hover': { bgcolor: 'error.light' },
-                        }}
                       >
+                        <i className="bi bi-trash me-1"></i>
                         Delete
                       </Button>
-                    </>
+                    </div>
                   ) : (
-                    <Typography variant="caption" color="text.secondary" sx={{ fontStyle: 'italic', pr: 1 }}>
+                    <small className="text-muted fst-italic">
                       Cannot edit/delete {issue.status} issues.
-                    </Typography>
+                    </small>
                   )}
-                </CardActions>
+                </Card.Footer>
               </Card>
-            </Grid>
+            </Col>
           ))}
-        </Grid>
+        </Row>
 
-        {/* Delete Confirmation Dialog */}
-        <Dialog
-          open={deleteDialogOpen}
-          onClose={closeDeleteDialog}
-          aria-labelledby="alert-dialog-title"
-          aria-describedby="alert-dialog-description"
-          PaperProps={{
-            sx: {
-              borderRadius: 4,
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-              bgcolor: 'rgba(255,255,255,0.9)',
-              backdropFilter: 'blur(8px)',
-            }
-          }}
+        {/* Delete Confirmation Modal */}
+        <Modal
+          show={deleteDialogOpen}
+          onHide={closeDeleteDialog}
+          centered
         >
-          <DialogTitle id="alert-dialog-title" sx={{ fontWeight: 'bold', color: 'primary.dark' }}>
-            {"Confirm Delete"}
-          </DialogTitle>
-          <DialogContent>
-            <DialogContentText id="alert-dialog-description" sx={{ color: 'text.primary' }}>
+          <Modal.Header closeButton className="border-0">
+            <Modal.Title className="fw-bold" style={{ color: 'var(--primary-color)' }}>
+              Confirm Delete
+            </Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <p className="mb-0">
               Are you sure you want to delete the issue "{issueToDelete?.title}" (ID: {issueToDelete?.issue_id})? This action cannot be undone.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions sx={{ p: 2 }}>
-            <Button onClick={closeDeleteDialog} sx={{ fontWeight: 'bold', color: 'text.secondary' }}>Cancel</Button>
-            <Button
-              onClick={handleDeleteIssue}
-              color="error"
-              autoFocus
-              variant="contained"
-              sx={{
-                borderRadius: 2,
-                fontWeight: 'bold',
-                '&:hover': {
-                  bgcolor: 'error.dark',
-                },
-              }}
-            >
+            </p>
+          </Modal.Body>
+          <Modal.Footer className="border-0">
+            <Button variant="secondary" onClick={closeDeleteDialog} className="fw-bold">
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleDeleteIssue} className="fw-bold">
               Delete
             </Button>
-          </DialogActions>
-        </Dialog>
+          </Modal.Footer>
+        </Modal>
       </Container>
-    </Box>
+    </div>
   );
 };
 

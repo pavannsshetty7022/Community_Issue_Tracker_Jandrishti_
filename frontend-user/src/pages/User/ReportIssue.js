@@ -1,14 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  TextField, Button, Typography, Container, Box, Alert,
-  MenuItem, Select, InputLabel, FormControl, CircularProgress, IconButton
-} from '@mui/material';
+import { Container, Row, Col, Card, Button, Form, Spinner } from 'react-bootstrap';
 import IssueService from '../../services/issue.service';
 import { useAuth } from '../../context/AuthContext';
-import PhotoCameraIcon from '@mui/icons-material/PhotoCamera';
-import EngineeringIcon from '@mui/icons-material/Engineering';
-import CloseIcon from '@mui/icons-material/Close';
+import BackButton from '../../components/BackButton';
+import toast from 'react-hot-toast';
 
 const issueOptions = [
   'Road potholes', 'Broken streetlights', 'Water supply leakage or shortage',
@@ -37,8 +33,6 @@ const ReportIssue = () => {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [previewMedia, setPreviewMedia] = useState([]);
   const [existingMedia, setExistingMedia] = useState([]);
-  const [message, setMessage] = useState('');
-  const [messageType, setMessageType] = useState('error');
   const [loading, setLoading] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [animateContent, setAnimateContent] = useState(false);
@@ -78,14 +72,12 @@ const ReportIssue = () => {
             setExistingMedia(formattedExistingMedia);
             setPreviewMedia(formattedExistingMedia.map(m => ({ url: m.url, type: m.type })));
           } else {
-            setMessage('Issue not found for editing.');
-            setMessageType('error');
+            toast.error('Issue not found for editing.');
             navigate('/dashboard');
           }
         } catch (err) {
           console.error('Failed to load issue for editing:', err);
-          setMessage(err.message || 'Error loading issue for editing.');
-          setMessageType('error');
+          toast.error(err.message || 'Error loading issue for editing.');
           navigate('/dashboard');
         } finally {
           setLoading(false);
@@ -134,12 +126,10 @@ const ReportIssue = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setMessage('');
-    setMessageType('error');
     setLoading(true);
 
     if (!user || !user.token) {
-      setMessage('You must be logged in to report/edit an issue.');
+      toast.error('You must be logged in to report/edit an issue.');
       setLoading(false);
       return;
     }
@@ -147,7 +137,7 @@ const ReportIssue = () => {
     const finalTitle = title === 'Other' ? customTitle : title;
 
     if (!finalTitle || !description || !location || !dateOfOccurrence) {
-      setMessage('All required fields must be filled.');
+      toast.error('All required fields must be filled.');
       setLoading(false);
       return;
     }
@@ -162,19 +152,17 @@ const ReportIssue = () => {
     try {
       if (isEditing) {
         await IssueService.editIssue(id, issueData, mediaFiles, existingMedia.map(m => m.path), user.token);
-        setMessage('Issue updated successfully!');
+        toast.success('Issue updated successfully!');
       } else {
         await IssueService.reportIssue(issueData, mediaFiles, user.token);
-        setMessage('Issue reported successfully!');
+        toast.success('Issue reported successfully!');
       }
-      setMessageType('success');
       setTimeout(() => {
         navigate('/dashboard');
       }, 1500);
     } catch (error) {
       console.error('Issue submission error:', error);
-      setMessage(error.message || `Something went wrong during issue ${isEditing ? 'update' : 'reporting'}.`);
-      setMessageType('error');
+      toast.error(error.message || `Something went wrong during issue ${isEditing ? 'update' : 'reporting'}.`);
     } finally {
       setLoading(false);
     }
@@ -182,280 +170,276 @@ const ReportIssue = () => {
 
   if (loading && isEditing) {
     return (
-      <Box sx={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        flexDirection: 'column',
-        background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
-      }}>
-        <CircularProgress size={60} sx={{ color: 'primary.main' }} />
-        <Typography variant="h6" sx={{ mt: 2, color: 'primary.dark' }}>Loading issue for edit...</Typography>
-      </Box>
+      <div className="d-flex flex-column">
+        <Container className="flex-grow-1 d-flex align-items-center justify-content-center py-5">
+          <div className="text-center">
+            <Spinner animation="border" variant="primary" size="lg" />
+            <h5 className="mt-3 text-primary">Loading issue for edit...</h5>
+          </div>
+        </Container>
+      </div>
     );
   }
 
   return (
-    <Box sx={{
-      flexGrow: 1,
-      minHeight: '100vh',
-      display: 'flex',
-      flexDirection: 'column',
-      background: 'linear-gradient(135deg, #e0e7ff 0%, #f5f7fa 100%)',
-      position: 'relative',
-      overflow: 'hidden',
-      justifyContent: 'center',
-      alignItems: 'center',
-      p: { xs: 2, sm: 4 },
-    }}>
-      <Box sx={{
+    <div className="position-relative overflow-hidden">
+      {/* Animated background elements */}
+      <div style={{
         position: 'absolute',
         top: '-100px',
         left: '-100px',
         width: '300px',
         height: '300px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, #90caf9 0%, #e0e7ff 80%)',
-        opacity: 0.4,
+        background: 'radial-gradient(circle, rgba(30, 58, 138, 0.1) 0%, rgba(248, 250, 252, 0.8) 80%)',
         zIndex: 0,
         filter: 'blur(30px)',
-        animation: 'float 8s ease-in-out infinite',
-        '@keyframes float': {
-          '0%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(40px)' },
-          '100%': { transform: 'translateY(0)' },
-        },
+        animation: 'float 8s ease-in-out infinite'
       }} />
-      <Box sx={{
+      <div style={{
         position: 'absolute',
         bottom: '-120px',
         right: '-120px',
         width: '350px',
         height: '350px',
         borderRadius: '50%',
-        background: 'radial-gradient(circle, #f48fb1 0%, #f5f7fa 80%)',
-        opacity: 0.3,
+        background: 'radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, rgba(248, 250, 252, 0.8) 80%)',
         zIndex: 0,
         filter: 'blur(40px)',
-        animation: 'float2 10s ease-in-out infinite',
-        '@keyframes float2': {
-          '0%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-30px)' },
-          '100%': { transform: 'translateY(0)' },
-        },
+        animation: 'float2 10s ease-in-out infinite'
       }} />
 
-      <Container maxWidth="md" sx={{
+      <style>
+        {`
+          @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(40px); }
+            100% { transform: translateY(0); }
+          }
+          @keyframes float2 {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-30px); }
+            100% { transform: translateY(0); }
+          }
+        `}
+      </style>
+
+      <Container className="flex-grow-1 py-4" style={{
         zIndex: 1,
         opacity: animateContent ? 1 : 0,
         transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
-        transition: 'opacity 1s ease-out, transform 1s ease-out',
+        transition: 'opacity 1s ease-out, transform 1s ease-out'
       }}>
-        <Box
-          sx={{
-            mt: 4,
-            mb: 4,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            p: { xs: 3, md: 6 },
-            boxShadow: '0 12px 40px 0 rgba(31, 38, 135, 0.18)',
-            borderRadius: 8,
-            bgcolor: 'rgba(255,255,255,0.8)',
-            backdropFilter: 'blur(16px)',
-          }}
-        >
-          <EngineeringIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-          <Typography component="h1" variant="h4" sx={{ fontWeight: 700, mb: 2, color: 'primary.dark' }}>
-            {isEditing ? 'Edit Issue' : 'Report New Issue'}
-          </Typography>
-          <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3, width: '100%' }}>
-            {message && <Alert severity={messageType} sx={{ mb: 2 }}>{message}</Alert>}
-            <FormControl fullWidth margin="normal" required sx={{ mb: 2 }}>
-              <InputLabel id="issue-title-label">Name of Issue (Title)</InputLabel>
-              <Select
-                labelId="issue-title-label"
-                id="title"
-                value={title}
-                label="Name of Issue (Title)"
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                  if (e.target.value === 'Other') {
-                    setCustomTitle('');
-                  }
-                }}
-              >
-                {issueOptions.map((option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            {title === 'Other' && (
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="customTitle"
-                label="Specify Other Issue"
-                name="customTitle"
-                value={customTitle}
-                onChange={(e) => setCustomTitle(e.target.value)}
-                sx={{ mb: 2 }}
-              />
-            )}
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="description"
-              label="Description"
-              name="description"
-              multiline
-              rows={4}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="location"
-              label="Manual Location"
-              name="location"
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="dateOfOccurrence"
-              label="Date of Occurrence"
-              name="dateOfOccurrence"
-              type="date"
-              InputLabelProps={{ shrink: true }}
-              value={dateOfOccurrence}
-              onChange={(e) => setDateOfOccurrence(e.target.value)}
-              sx={{ mb: 2 }}
-            />
-            <Box sx={{ mt: 2, mb: 2 }}>
-              <input
-                accept="image/*,video/*"
-                style={{ display: 'none' }}
-                id="media-upload"
-                type="file"
-                multiple
-                onChange={handleFileChange}
-              />
-              <label htmlFor="media-upload">
-                <Button
-                  variant="outlined"
-                  component="span"
-                  startIcon={<PhotoCameraIcon />}
-                  sx={{
-                    borderRadius: 5,
-                    px: 3,
-                    py: 1.5,
-                    borderColor: 'primary.main',
-                    color: 'primary.main',
-                    fontWeight: 'bold',
-                    '&:hover': {
-                      borderColor: 'primary.dark',
-                      bgcolor: 'primary.light',
-                    },
-                  }}
-                >
-                  Upload Media (Images/Videos)
-                </Button>
-              </label>
+        <BackButton />
 
-              <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
-                {previewMedia.map((media, index) => (
-                  <Box key={media.url} sx={{ position: 'relative', width: 150, height: 150, border: '1px solid #ddd', borderRadius: '8px', overflow: 'hidden', display: 'flex', justifyContent: 'center', alignItems: 'center', boxShadow: '0 4px 8px rgba(0,0,0,0.1)' }}>
-                    {media.type === 'image' ? (
-                      <img src={media.url} alt={`Media Preview ${index}`} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                    ) : (
-                      <video src={media.url} controls style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
-                    )}
-                    <IconButton
-                      aria-label="delete"
-                      size="small"
-                      sx={{
-                        position: 'absolute',
-                        top: 4,
-                        right: 4,
-                        bgcolor: 'rgba(255, 255, 255, 0.7)',
-                        '&:hover': { bgcolor: 'rgba(255, 255, 255, 0.9)' },
+        <Row className="justify-content-center">
+          <Col xs={12} lg={10} xl={8}>
+            <Card className="shadow-lg border-0" style={{
+              backgroundColor: 'var(--card-color)',
+              borderRadius: '16px'
+            }}>
+              <Card.Body className="p-4 p-md-5">
+                <div className="text-center mb-4">
+                  <i className="bi bi-flag-fill display-4 text-primary mb-3"></i>
+                  <h2 className="fw-bold text-primary">
+                    {isEditing ? 'Edit Issue' : 'Report New Issue'}
+                  </h2>
+                  <p className="text-muted">Help us improve our community</p>
+                </div>
+
+                <Form onSubmit={handleSubmit}>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Name of Issue (Title)</Form.Label>
+                    <Form.Select
+                      id="title"
+                      value={title}
+                      onChange={(e) => {
+                        setTitle(e.target.value);
+                        if (e.target.value === 'Other') {
+                          setCustomTitle('');
+                        }
                       }}
-                      onClick={() => handleRemoveMedia(index, media.isNew)}
+                      required
                     >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                    {media.name && !media.isNew && (
-                        <Typography variant="caption" sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, bgcolor: 'rgba(0,0,0,0.5)', color: 'white', px: 1, py: 0.5, textAlign: 'center' }}>
-                          {media.name}
-                        </Typography>
+                      <option value="">Select an issue type</option>
+                      {issueOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+
+                  {title === 'Other' && (
+                    <Form.Group className="mb-3">
+                      <Form.Label>Specify Other Issue</Form.Label>
+                      <Form.Control
+                        type="text"
+                        id="customTitle"
+                        placeholder="Please specify the issue"
+                        value={customTitle}
+                        onChange={(e) => setCustomTitle(e.target.value)}
+                        required
+                      />
+                    </Form.Group>
+                  )}
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Description</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={4}
+                      id="description"
+                      placeholder="Describe the issue in detail"
+                      value={description}
+                      onChange={(e) => setDescription(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Manual Location</Form.Label>
+                    <Form.Control
+                      type="text"
+                      id="location"
+                      placeholder="Enter the location of the issue"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Date of Occurrence</Form.Label>
+                    <Form.Control
+                      type="date"
+                      id="dateOfOccurrence"
+                      value={dateOfOccurrence}
+                      onChange={(e) => setDateOfOccurrence(e.target.value)}
+                      required
+                    />
+                  </Form.Group>
+
+                  <Form.Group className="mb-3">
+                    <Form.Label>Upload Media (Images/Videos)</Form.Label>
+                    <div>
+                      <Form.Control
+                        type="file"
+                        accept="image/*,video/*"
+                        multiple
+                        onChange={handleFileChange}
+                        className="d-none"
+                        id="media-upload"
+                      />
+                      <Button
+                        as="label"
+                        htmlFor="media-upload"
+                        variant="outline-primary"
+                        className="d-flex align-items-center fw-bold"
+                        style={{ borderRadius: '8px' }}
+                      >
+                        <i className="bi bi-camera me-2"></i>
+                        Choose Files
+                      </Button>
+                    </div>
+
+                    {previewMedia.length > 0 && (
+                      <div className="d-flex flex-wrap gap-3 mt-3">
+                        {previewMedia.map((media, index) => (
+                          <div key={media.url} className="position-relative" style={{
+                            width: '150px',
+                            height: '150px',
+                            border: '1px solid #ddd',
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            display: 'flex',
+                            justifyContent: 'center',
+                            alignItems: 'center',
+                            boxShadow: '0 4px 8px rgba(0,0,0,0.1)'
+                          }}>
+                            {media.type === 'image' ? (
+                              <img
+                                src={media.url}
+                                alt={`Media Preview ${index}`}
+                                style={{
+                                  maxWidth: '100%',
+                                  maxHeight: '100%',
+                                  objectFit: 'contain'
+                                }}
+                              />
+                            ) : (
+                              <video
+                                src={media.url}
+                                controls
+                                style={{
+                                  maxWidth: '100%',
+                                  maxHeight: '100%',
+                                  objectFit: 'contain'
+                                }}
+                              />
+                            )}
+                            <Button
+                              variant="light"
+                              size="sm"
+                              className="position-absolute top-0 end-0 m-1 rounded-circle"
+                              style={{
+                                width: '30px',
+                                height: '30px',
+                                padding: '0',
+                                backgroundColor: 'rgba(255, 255, 255, 0.8)'
+                              }}
+                              onClick={() => handleRemoveMedia(index, media.isNew)}
+                            >
+                              <i className="bi bi-x"></i>
+                            </Button>
+                            {media.name && !media.isNew && (
+                              <div className="position-absolute bottom-0 start-0 end-0 bg-dark bg-opacity-50 text-white text-center p-1 small">
+                                {media.name}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     )}
-                  </Box>
-                ))}
-              </Box>
-            </Box>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              size="large"
-              sx={{
-                mt: 3,
-                mb: 2,
-                borderRadius: 5,
-                boxShadow: 6,
-                fontWeight: 900,
-                px: 5,
-                py: 2,
-                fontSize: '1.2rem',
-                background: 'linear-gradient(90deg, #42a5f5 0%, #7e57c2 100%)',
-                color: '#fff',
-                transition: 'box-shadow 0.3s, transform 0.3s',
-                '&:hover': {
-                  boxShadow: 12,
-                  background: 'linear-gradient(90deg, #7e57c2 0%, #42a5f5 100%)',
-                  transform: 'scale(1.03)',
-                },
-              }}
-              disabled={loading}
-            >
-              {loading ? <CircularProgress size={24} color="inherit" /> : (isEditing ? 'Update Issue' : 'Submit Issue')}
-            </Button>
-            <Button
-              fullWidth
-              variant="outlined"
-              onClick={() => navigate('/dashboard')}
-              sx={{
-                borderRadius: 5,
-                px: 5,
-                py: 1.5,
-                borderColor: 'text.secondary',
-                color: 'text.secondary',
-                fontWeight: 'bold',
-                '&:hover': {
-                  borderColor: 'primary.main',
-                  color: 'primary.main',
-                  bgcolor: 'action.hover',
-                },
-              }}
-            >
-              Cancel
-            </Button>
-          </Box>
-        </Box>
+                  </Form.Group>
+
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    className="w-100 fw-bold mb-3"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="me-2" />
+                        {isEditing ? 'Updating Issue...' : 'Submitting Issue...'}
+                      </>
+                    ) : (
+                      <>
+                        <i className="bi bi-send me-2"></i>
+                        {isEditing ? 'Update Issue' : 'Submit Issue'}
+                      </>
+                    )}
+                  </Button>
+
+                  <Button
+                    variant="outline-secondary"
+                    size="lg"
+                    className="w-100 fw-bold"
+                    onClick={() => navigate('/dashboard')}
+                  >
+                    <i className="bi bi-arrow-left me-2"></i>
+                    Cancel
+                  </Button>
+                </Form>
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
       </Container>
-    </Box>
+    </div>
   );
 };
 
