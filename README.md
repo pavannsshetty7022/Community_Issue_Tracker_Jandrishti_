@@ -71,7 +71,7 @@ Follow these instructions to set up the project locally.
 
 1.  **Navigate to the backend directory:**
     ```bash
-    cd jan-drishti/backend
+    cd backend
     ```
 
 2.  **Install dependencies:**
@@ -125,8 +125,8 @@ npm start
 Project Structure
 ├── frontend-admin/      # Admin dashboard interface
 ├── frontend-user/       # User interface for citizens
-└── jan-drishti/         # Backend server
-    └── backend/
+└── backend/        # Backend server
+
 Default Admin Credentials
 Username: admin
 
