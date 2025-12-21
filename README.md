@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/TusharKesarwani/Front-End-Projects/main/Projects/Google%20Translate/assets/logo.png" alt="JanDrishti Logo" width="150"/>
+  <img src="assets/Jandrishti JD Logo.png" alt="JanDrishti Logo" width="150"/>
   <h1>JanDrishti</h1>
   <p><b>Public Grievance Management System 🗳️</b></p>
   <p>
