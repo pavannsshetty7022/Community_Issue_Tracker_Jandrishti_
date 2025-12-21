@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/Jandrishti JD Logo.png" alt="JanDrishti Logo" width="150"/>
+  <img src="assets/images/Jandrishti JD Logo.png" alt="JanDrishti Logo" width="150"/>
   <h1>JanDrishti</h1>
   <p><b>Public Grievance Management System 🗳️</b></p>
   <p>
