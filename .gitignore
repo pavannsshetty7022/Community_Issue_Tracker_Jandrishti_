@@ -26,6 +26,4 @@
 ehthumbs.db
 Thumbs.db
 
-# uploaded files
-jan-drishti/backend/uploads/*
-!jan-drishti/backend/uploads/.gitkeep
+backend/uploads/
