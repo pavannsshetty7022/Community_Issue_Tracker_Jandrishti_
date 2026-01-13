@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import toast from 'react-hot-toast';
 
 const userTypes = [
-  'Student', 'Senior Citizen', 'Working Professional / Employee',
+  'Citizen', 'Student', 'Senior Citizen', 'Working Professional / Employee',
   'Business Owner', 'Homemaker', 'Unemployed', 'Retired', 'Other'
 ];
 
@@ -78,7 +78,7 @@ const Register = () => {
   return (
     <div className="position-relative overflow-hidden bg-light min-vh-100 py-5">
 
-      <div style={{ position: 'absolute', top: '-10%">', left: '-10%', width: '400px', height: '400px', borderRadius: '50%', background: 'rgba(30, 58, 138, 0.05)', filter: 'blur(80px)', zIndex: 0 }} />
+      <div style={{ position: 'absolute', top: '-10%', left: '-10%', width: '400px', height: '400px', borderRadius: '50%', background: 'rgba(30, 58, 138, 0.05)', filter: 'blur(80px)', zIndex: 0 }} />
       <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'rgba(249, 115, 22, 0.05)', filter: 'blur(100px)', zIndex: 0 }} />
 
       <Container className="position-relative px-3 px-md-4" style={{ zIndex: 1 }}>
@@ -88,7 +88,7 @@ const Register = () => {
               <Row className="g-0">
                 <Col md={12} className="p-3 p-md-4 p-lg-5">
                   <div className="text-center mb-4 mb-md-5">
-                    <h1 className="display-6 display-md-5 fw-bold text-primary mb-2">Join Jan Drishti JD</h1>
+                    <h1 className="display-6 display-md-5 fw-bold text-primary mb-2">Join Jan Drishti</h1>
                     <p className="text-muted fs-6 fs-md-5">Empower your community in one simple step</p>
                   </div>
 

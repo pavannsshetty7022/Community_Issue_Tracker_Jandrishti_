@@ -1,21 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { MapContainer, TileLayer, Marker, useMapEvents, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Form, ListGroup, Card, Spinner } from 'react-bootstrap';
+import { Form, ListGroup, Card, Spinner, InputGroup, Button } from 'react-bootstrap';
 import { debounce } from 'lodash';
-
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-png',
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
 const LocationMarker = ({ position, setPosition, reverseGeocode }) => {
-    const map = useMap();
-
     useMapEvents({
         click(e) {
             const { lat, lng } = e.latlng;
@@ -23,12 +20,6 @@ const LocationMarker = ({ position, setPosition, reverseGeocode }) => {
             reverseGeocode(lat, lng);
         },
     });
-
-    useEffect(() => {
-        if (position) {
-            map.flyTo(position, map.getZoom());
-        }
-    }, [position, map]);
 
     return position === null ? null : (
         <Marker position={position} />
@@ -38,7 +29,9 @@ const LocationMarker = ({ position, setPosition, reverseGeocode }) => {
 const ChangeView = ({ center, zoom }) => {
     const map = useMap();
     useEffect(() => {
-        map.setView(center, zoom);
+        if (center) {
+            map.setView(center, zoom);
+        }
     }, [center, zoom, map]);
     return null;
 };
@@ -58,31 +51,40 @@ const LocationPicker = ({ value, onChange, isEditing = false }) => {
             setZoom(15);
             setSearchQuery(value.address || '');
         } else if (!isEditing) {
-
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const { latitude, longitude } = pos.coords;
                     setMapCenter([latitude, longitude]);
                     setZoom(13);
                 },
-                () => console.log('Geolocation permission denied')
+                (err) => console.log(err.message)
             );
         }
     }, [isEditing, value?.lat, value?.lng, value?.address]);
 
-    const handleSearch = debounce(async (query) => {
-        if (query.length < 3) return;
-        setIsSearching(true);
-        try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=in`);
-            const data = await response.json();
-            setSuggestions(data);
-        } catch (error) {
-            console.error('Search error:', error);
-        } finally {
-            setIsSearching(false);
-        }
-    }, 500);
+    const handleSearch = useCallback(
+        debounce(async (query) => {
+            if (query.length < 3) {
+                setSuggestions([]);
+                return;
+            }
+            setIsSearching(true);
+            try {
+                const response = await fetch(
+                    `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+                        query
+                    )}&countrycodes=in&limit=5&accept-language=en`
+                );
+                const data = await response.json();
+                setSuggestions(data);
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setIsSearching(false);
+            }
+        }, 800),
+        []
+    );
 
     const selectLocation = (item) => {
         const lat = parseFloat(item.lat);
@@ -100,71 +102,90 @@ const LocationPicker = ({ value, onChange, isEditing = false }) => {
         });
     };
 
-    const reverseGeocode = React.useCallback(async (lat, lng) => {
+    const reverseGeocode = useCallback(async (lat, lng) => {
         try {
-            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+            const response = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=en`
+            );
             const data = await response.json();
-            setSearchQuery(data.display_name);
+            const address = data.display_name;
+            setSearchQuery(address);
             onChange({
                 lat,
                 lng,
-                address: data.display_name
+                address
             });
         } catch (error) {
-            console.error('Reverse geocode error:', error);
+            console.error(error);
         }
     }, [onChange]);
 
     return (
-        <Card className="location-picker-card mb-3 shadow-sm border-0">
+        <Card className="location-picker-card mb-3 shadow-sm border-0 bg-transparent">
             <Card.Body className="p-0">
-                <div className="p-3 bg-light border-bottom">
-                    <Form.Group className="position-relative mb-0">
-                        <Form.Label className="fw-bold small text-muted text-uppercase mb-2">
-                            <i className="bi bi-search me-2"></i>Search or click on the map to select issue location
-                        </Form.Label>
-                        <div className="input-group">
-                            <Form.Control
-                                type="text"
-                                placeholder="Enter area, city or landmark..."
-                                value={searchQuery}
-                                onChange={(e) => {
-                                    setSearchQuery(e.target.value);
-                                    handleSearch(e.target.value);
-                                }}
-                                className="rounded-3 border-0 shadow-none bg-white py-2"
-                            />
-                            {isSearching && (
-                                <span className="input-group-text bg-white border-0">
-                                    <Spinner animation="border" size="sm" />
-                                </span>
-                            )}
-                        </div>
-
-                        {suggestions.length > 0 && (
-                            <ListGroup className="position-absolute w-100 mt-1 shadow-lg" style={{ zIndex: 1100, maxHeight: '200px', overflowY: 'auto' }}>
-                                {suggestions.map((item) => (
-                                    <ListGroup.Item
-                                        key={item.place_id}
-                                        action
-                                        onClick={() => selectLocation(item)}
-                                        className="small py-2 border-0 border-bottom"
-                                    >
-                                        <i className="bi bi-geo-alt-fill text-danger me-2"></i>
-                                        {item.display_name}
-                                    </ListGroup.Item>
-                                ))}
-                            </ListGroup>
+                <div className="mb-3">
+                    <Form.Label className="small fw-bold text-muted text-uppercase mb-2 d-flex align-items-center">
+                        <i className="bi bi-geo-alt-fill text-primary me-2"></i>
+                        Find Location
+                    </Form.Label>
+                    <InputGroup className="shadow-sm rounded-3 overflow-hidden">
+                        <InputGroup.Text className="bg-white border-0">
+                            <i className="bi bi-search text-muted"></i>
+                        </InputGroup.Text>
+                        <Form.Control
+                            type="text"
+                            placeholder="Enter area, landmark, or city..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                handleSearch(e.target.value);
+                            }}
+                            className="border-0 py-2 shadow-none"
+                        />
+                        {isSearching && (
+                            <InputGroup.Text className="bg-white border-0">
+                                <Spinner animation="border" size="sm" variant="primary" />
+                            </InputGroup.Text>
                         )}
-                    </Form.Group>
+                        {searchQuery && (
+                            <Button
+                                variant="white"
+                                className="border-0 text-muted"
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setSuggestions([]);
+                                }}
+                            >
+                                <i className="bi bi-x-lg"></i>
+                            </Button>
+                        )}
+                    </InputGroup>
+
+                    {suggestions.length > 0 && (
+                        <ListGroup className="suggestion-list mt-1 shadow-lg border-0">
+                            {suggestions.map((item) => (
+                                <ListGroup.Item
+                                    key={item.place_id}
+                                    action
+                                    onClick={() => selectLocation(item)}
+                                    className="small border-0 border-bottom py-2 bg-white"
+                                >
+                                    <div className="d-flex">
+                                        <i className="bi bi-geo-alt mt-1 me-2 text-primary"></i>
+                                        <span className="text-truncate">{item.display_name}</span>
+                                    </div>
+                                </ListGroup.Item>
+                            ))}
+                        </ListGroup>
+                    )}
                 </div>
 
-                <div style={{ height: '350px', width: '100%', position: 'relative' }}>
+                <div className="map-container-wrapper rounded-3 overflow-hidden shadow-sm" style={{ height: '300px', width: '100%', border: '1px solid var(--primary-light)' }}>
                     <MapContainer
                         center={mapCenter}
                         zoom={zoom}
                         scrollWheelZoom={true}
-                        style={{ height: '100%', width: '100%', zIndex: 1 }}
+                        style={{ height: '100%', width: '100%' }}
                     >
                         <TileLayer
                             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -179,17 +200,12 @@ const LocationPicker = ({ value, onChange, isEditing = false }) => {
                     </MapContainer>
                 </div>
 
-                {value?.lat && (
-                    <div className="p-2 px-3 bg-white border-top small text-muted d-flex justify-content-between align-items-center">
-                        <div>
-                            <span className="fw-bold me-2">Lat:</span> {value.lat.toFixed(6)}
-                            <span className="fw-bold ms-3 me-2">Lng:</span> {value.lng.toFixed(6)}
-                        </div>
-                        <div className="badge bg-primary-light text-primary rounded-pill px-3 py-2">
-                            <i className="bi bi-check-circle-fill me-1"></i> Location Selected
-                        </div>
-                    </div>
-                )}
+                <div className="mt-2 text-end">
+                    <small className="text-muted fst-italic">
+                        <i className="bi bi-info-circle me-1"></i>
+                        Click on the map to manually adjust location
+                    </small>
+                </div>
             </Card.Body>
         </Card>
     );

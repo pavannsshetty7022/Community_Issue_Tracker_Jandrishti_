@@ -48,7 +48,7 @@ const IssueMapDisplay = ({ lat, lng, address }) => {
             <Card.Footer className="bg-white border-0 py-2 px-3 small text-muted">
                 <div className="d-flex justify-content-between align-items-center">
                     <span><i className="bi bi-geo-alt-fill text-primary me-1"></i> {address}</span>
-                    <span className="badge bg-primary-light text-primary px-3">{lat.toFixed(4)}, {lng.toFixed(4)}</span>
+                    <span className="badge bg-primary-light text-primary px-3">{parseFloat(lat).toFixed(4)}, {parseFloat(lng).toFixed(4)}</span>
                 </div>
             </Card.Footer>
         </Card>

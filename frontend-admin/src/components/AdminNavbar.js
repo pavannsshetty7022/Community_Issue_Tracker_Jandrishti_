@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
+import { Link } from 'react-router-dom';
 import { useAdminAuth } from '../context/AdminAuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Logo from './Logo';
@@ -30,12 +30,10 @@ const AdminNavbar = () => {
     >
       <Container className="px-3 px-md-4">
 
-        <LinkContainer to="/dashboard">
-          <Navbar.Brand className="d-flex align-items-center">
-            <Logo fontSize="1.5rem" />
-            <span className="ms-2 fw-bold text-primary h5 mb-0"></span>
-          </Navbar.Brand>
-        </LinkContainer>
+        <Nav.Link as={Link} to="/dashboard" className="navbar-brand d-flex align-items-center">
+          <Logo fontSize="1.5rem" />
+          <span className="ms-2 fw-bold text-primary h5 mb-0"></span>
+        </Nav.Link>
 
         <div className="d-none d-lg-block position-absolute start-50 translate-middle-x">
           <span className="fw-bold text-muted text-uppercase small tracking-widest">
@@ -81,14 +79,12 @@ const AdminNavbar = () => {
                 <span className="d-none d-sm-inline">Logout</span>
               </Button>
             ) : (
-              <LinkContainer to="/login">
-                <Nav.Link>
-                  <Button variant="primary" size="sm" className="rounded-pill px-3">
-                    <i className="bi bi-box-arrow-in-right me-1"></i>
-                    Login
-                  </Button>
-                </Nav.Link>
-              </LinkContainer>
+              <Nav.Link as={Link} to="/login" className="p-0">
+                <Button variant="primary" size="sm" className="rounded-pill px-3">
+                  <i className="bi bi-box-arrow-in-right me-1"></i>
+                  Login
+                </Button>
+              </Nav.Link>
             )}
           </Nav>
         </Navbar.Collapse>

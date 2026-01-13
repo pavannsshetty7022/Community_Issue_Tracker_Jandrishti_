@@ -222,7 +222,7 @@ app.post('/api/auth/register', async (req, res) => {
     );
 
     const userId = result.insertId;
-    const token = jwt.sign({ id: userId, username }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: userId, username }, JWT_SECRET, { expiresIn: '24h' });
 
     res.status(201).json({
       message: 'User registered successfully',
@@ -256,7 +256,7 @@ app.post('/api/auth/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid credentials' });
     }
 
-    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '24h' });
     res.json({ token, id: user.id, username: user.username, profileCompleted: user.profile_completed });
   } catch (error) {
     console.error('Login error:', error);
@@ -288,7 +288,7 @@ app.post('/api/admin/login', async (req, res) => {
       return res.status(400).json({ message: 'Invalid admin credentials' });
     }
 
-    const token = jwt.sign({ id: admin.id, username: admin.username, role: 'admin' }, JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ id: admin.id, username: admin.username, role: 'admin' }, JWT_SECRET, { expiresIn: '24h' });
     console.log('Admin login successful for:', username);
     res.json({ token, id: admin.id, username: admin.username });
   } catch (error) {

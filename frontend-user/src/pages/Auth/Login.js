@@ -17,6 +17,11 @@ const Login = () => {
     setPassword('');
     setShowPassword(false);
     setAnimateContent(true);
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('expired')) {
+      toast.error('Your session has expired. Please login again.', { id: 'session-expired' });
+    }
   }, []);
 
   const handleClickShowPassword = () => {

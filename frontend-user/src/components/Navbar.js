@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar, Nav, Container, Button } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import Logo from './Logo';
@@ -35,43 +35,41 @@ const NavigationBar = () => {
       className={`py-3 shadow-sm ${isDarkMode ? 'border-bottom border-secondary' : 'border-bottom'}`}
     >
       <Container className="px-3 px-md-4 px-lg-5">
-        <LinkContainer to="/home">
-          <Navbar.Brand className="d-flex align-items-center ps-0">
-            <Logo fontSize="1.4rem" />
-          </Navbar.Brand>
-        </LinkContainer>
+        <Nav.Link as={Link} to="/home" className="d-flex align-items-center ps-0 navbar-brand">
+          <Logo fontSize="1.4rem" />
+        </Nav.Link>
 
         <Navbar.Toggle aria-controls="basic-navbar-nav" className="border-0 shadow-none" />
 
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="mx-lg-auto text-center py-3 py-lg-0 fw-semibold">
-            <LinkContainer to="/home">
-              <Nav.Link
-                className="px-lg-3 mx-lg-1"
-                active={isActive('/home') || isActive('/')}
-              >
-                Home
-              </Nav.Link>
-            </LinkContainer>
+            <Nav.Link
+              as={Link}
+              to="/home"
+              className="px-lg-3 mx-lg-1"
+              active={isActive('/home') || isActive('/')}
+            >
+              Home
+            </Nav.Link>
 
             {user && (
               <>
-                <LinkContainer to="/dashboard">
-                  <Nav.Link
-                    className="px-lg-3 mx-lg-1"
-                    active={isActive('/dashboard')}
-                  >
-                    Dashboard
-                  </Nav.Link>
-                </LinkContainer>
-                <LinkContainer to="/report-issue">
-                  <Nav.Link
-                    className="px-lg-3 mx-lg-1"
-                    active={isActive('/report-issue')}
-                  >
-                    Report Issue
-                  </Nav.Link>
-                </LinkContainer>
+                <Nav.Link
+                  as={Link}
+                  to="/dashboard"
+                  className="px-lg-3 mx-lg-1"
+                  active={isActive('/dashboard')}
+                >
+                  Dashboard
+                </Nav.Link>
+                <Nav.Link
+                  as={Link}
+                  to="/report-issue"
+                  className="px-lg-3 mx-lg-1"
+                  active={isActive('/report-issue')}
+                >
+                  Report Issue
+                </Nav.Link>
               </>
             )}
           </Nav>
@@ -89,20 +87,20 @@ const NavigationBar = () => {
             {user ? (
               <>
 
-                <LinkContainer to="/profile">
-                  <Button
-                    variant={isDarkMode ? 'outline-light' : 'outline-primary'}
-                    className="rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-                    style={{
-                      ...circleButtonStyle,
-                      fontSize: '18px',
-                      fontWeight: '700'
-                    }}
-                    title="View Profile"
-                  >
-                    {(user.full_name || user.username || 'U')[0].toUpperCase()}
-                  </Button>
-                </LinkContainer>
+                <Button
+                  as={Link}
+                  to="/profile"
+                  variant={isDarkMode ? 'outline-light' : 'outline-primary'}
+                  className="rounded-circle d-flex align-items-center justify-content-center shadow-sm"
+                  style={{
+                    ...circleButtonStyle,
+                    fontSize: '18px',
+                    fontWeight: '700'
+                  }}
+                  title="View Profile"
+                >
+                  {(user.full_name || user.username || 'U')[0].toUpperCase()}
+                </Button>
 
                 <Button
                   variant="danger"
@@ -116,25 +114,25 @@ const NavigationBar = () => {
               </>
             ) : (
               <>
-                <LinkContainer to="/login">
-                  <Button
-                    variant="outline-primary"
-                    className="fw-bold px-3 px-md-4 rounded-pill"
-                    style={{ height: '46px', fontSize: '0.9rem' }}
-                  >
-                    Login
-                  </Button>
-                </LinkContainer>
+                <Button
+                  as={Link}
+                  to="/login"
+                  variant="outline-primary"
+                  className="fw-bold px-3 px-md-4 rounded-pill"
+                  style={{ height: '46px', fontSize: '0.9rem' }}
+                >
+                  Login
+                </Button>
 
-                <LinkContainer to="/register">
-                  <Button
-                    variant="primary"
-                    className="fw-bold px-3 px-md-4 rounded-pill shadow-sm"
-                    style={{ height: '46px', fontSize: '0.9rem' }}
-                  >
-                    Register
-                  </Button>
-                </LinkContainer>
+                <Button
+                  as={Link}
+                  to="/register"
+                  variant="primary"
+                  className="fw-bold px-3 px-md-4 rounded-pill shadow-sm"
+                  style={{ height: '46px', fontSize: '0.9rem' }}
+                >
+                  Register
+                </Button>
               </>
             )}
           </Nav>

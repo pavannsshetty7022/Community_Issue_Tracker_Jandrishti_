@@ -350,16 +350,14 @@ const ReportIssue = () => {
                         className="d-none"
                         id="media-upload"
                       />
-                      <Button
-                        as="label"
+                      <label
                         htmlFor="media-upload"
-                        variant="outline-primary"
-                        className="d-flex align-items-center fw-bold"
-                        style={{ borderRadius: '8px' }}
+                        className="btn btn-outline-primary d-flex align-items-center fw-bold"
+                        style={{ borderRadius: '8px', cursor: 'pointer' }}
                       >
                         <i className="bi bi-camera me-2"></i>
                         Choose Files
-                      </Button>
+                      </label>
                     </div>
 
                     {previewMedia.length > 0 && (
