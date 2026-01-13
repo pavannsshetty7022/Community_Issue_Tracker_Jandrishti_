@@ -111,9 +111,8 @@ const Home = () => {
       >
         <Carousel.Item>
           <div
-            className="d-flex align-items-center justify-content-center"
+            className="d-flex align-items-center justify-content-center hero-carousel-item"
             style={{
-              height: '500px',
               backgroundImage: 'url(/images/pothole-road.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -131,18 +130,17 @@ const Home = () => {
                 zIndex: 1
               }}
             ></div>
-            <div className="text-center text-white px-4" style={{ position: 'relative', zIndex: 2 }}>
-              <h1 className="display-3 fw-bold mb-3">Pothole on Road</h1>
-              <p className="lead fs-3">Road damaged? Report it in seconds.</p>
+            <div className="text-center text-white px-3 px-md-4" style={{ position: 'relative', zIndex: 2 }}>
+              <h1 className="display-4 display-md-3 fw-bold mb-2 mb-md-3">Pothole on Road</h1>
+              <p className="lead fs-5 fs-md-3">Road damaged? Report it in seconds.</p>
             </div>
           </div>
         </Carousel.Item>
 
         <Carousel.Item>
           <div
-            className="d-flex align-items-center justify-content-center"
+            className="d-flex align-items-center justify-content-center hero-carousel-item"
             style={{
-              height: '500px',
               backgroundImage: 'url(/images/broken-streetlight.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -160,18 +158,17 @@ const Home = () => {
                 zIndex: 1
               }}
             ></div>
-            <div className="text-center text-white px-4" style={{ position: 'relative', zIndex: 2 }}>
-              <h1 className="display-3 fw-bold mb-3">Broken Streetlight / Open Drain</h1>
-              <p className="lead fs-3">Small issues matter. Raise them easily.</p>
+            <div className="text-center text-white px-3 px-md-4" style={{ position: 'relative', zIndex: 2 }}>
+              <h1 className="display-4 display-md-3 fw-bold mb-2 mb-md-3">Broken Streetlight / Open Drain</h1>
+              <p className="lead fs-5 fs-md-3">Small issues matter. Raise them easily.</p>
             </div>
           </div>
         </Carousel.Item>
 
         <Carousel.Item>
           <div
-            className="d-flex align-items-center justify-content-center"
+            className="d-flex align-items-center justify-content-center hero-carousel-item"
             style={{
-              height: '500px',
               backgroundImage: 'url(/images/citizen-reporting.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -189,18 +186,17 @@ const Home = () => {
                 zIndex: 1
               }}
             ></div>
-            <div className="text-center text-white px-4" style={{ position: 'relative', zIndex: 2 }}>
-              <h1 className="display-3 fw-bold mb-3">Citizen Reporting via Mobile</h1>
-              <p className="lead fs-3">Citizens report. Authorities respond.</p>
+            <div className="text-center text-white px-3 px-md-4" style={{ position: 'relative', zIndex: 2 }}>
+              <h1 className="display-4 display-md-3 fw-bold mb-2 mb-md-3">Citizen Reporting via Mobile</h1>
+              <p className="lead fs-5 fs-md-3">Citizens report. Authorities respond.</p>
             </div>
           </div>
         </Carousel.Item>
 
         <Carousel.Item>
           <div
-            className="d-flex align-items-center justify-content-center"
+            className="d-flex align-items-center justify-content-center hero-carousel-item"
             style={{
-              height: '500px',
               backgroundImage: 'url(/images/resolved-clean-street.jpg)',
               backgroundSize: 'cover',
               backgroundPosition: 'center',
@@ -218,9 +214,9 @@ const Home = () => {
                 zIndex: 1
               }}
             ></div>
-            <div className="text-center text-white px-4" style={{ position: 'relative', zIndex: 2 }}>
-              <h1 className="display-3 fw-bold mb-3">Resolved Issue / Clean Street</h1>
-              <p className="lead fs-3">Track progress. See real impact.</p>
+            <div className="text-center text-white px-3 px-md-4" style={{ position: 'relative', zIndex: 2 }}>
+              <h1 className="display-4 display-md-3 fw-bold mb-2 mb-md-3">Resolved Issue / Clean Street</h1>
+              <p className="lead fs-5 fs-md-3">Track progress. See real impact.</p>
             </div>
           </div>
         </Carousel.Item>
@@ -252,10 +248,10 @@ const Home = () => {
       <section className="issue-categories py-5" style={{ backgroundColor: 'var(--card-color)' }} data-aos="fade-up">
         <Container>
           <div className="text-center mb-5" data-aos="fade-up">
-            <h2 className="display-5 fw-bold mb-3" style={{ color: 'var(--primary-text)' }}>
+            <h2 className="display-6 display-md-5 fw-bold mb-3 px-3" style={{ color: 'var(--primary-text)' }}>
               Common Issues You Can Report
             </h2>
-            <p className="lead text-muted">
+            <p className="lead text-muted px-3">
               Select from various categories to report problems in your community
             </p>
           </div>
@@ -302,10 +298,10 @@ const Home = () => {
       <section className="how-it-works py-5" data-aos="fade-up">
         <Container>
           <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold mb-3" style={{ color: 'var(--primary-text)' }}>
+            <h2 className="display-6 display-md-5 fw-bold mb-3 px-3" style={{ color: 'var(--primary-text)' }}>
               How It Works
             </h2>
-            <p className="lead text-muted">
+            <p className="lead text-muted px-3">
               Simple 4-step process to report and resolve community issues
             </p>
           </div>
@@ -339,48 +335,47 @@ const Home = () => {
       <section className="about-us py-5" style={{ backgroundColor: 'var(--card-color)' }} data-aos="fade-up">
         <Container>
           <Row className="align-items-center g-5">
-            <Col lg={6} data-aos="fade-right">
-              <h2 className="display-5 fw-bold mb-4" style={{ color: 'var(--primary-text)' }}>
+            <Col lg={6} data-aos="fade-right" className="mb-4 mb-lg-0">
+              <h2 className="display-6 display-md-5 fw-bold mb-4 px-3 px-md-0" style={{ color: 'var(--primary-text)' }}>
                 About JanDrishti
               </h2>
-              <p className="lead mb-4" style={{ lineHeight: '1.8' }}>
+              <p className="lead mb-4 px-3 px-md-0" style={{ lineHeight: '1.8' }}>
                 JanDrishti is a community-driven platform that enables citizens to report local issues,
                 track their resolution, and collaborate with authorities to improve neighborhoods.
               </p>
-              <p className="text-muted mb-4" style={{ fontSize: '1.1rem', lineHeight: '1.8' }}>
+              <p className="text-muted mb-4 px-3 px-md-0" style={{ fontSize: '1rem', lineHeight: '1.8' }}>
                 Our mission is to empower communities through transparency and accountability.
                 We believe that every citizen has the right to a clean, safe, and well-maintained environment.
                 JanDrishti bridges the gap between citizens and authorities, making civic engagement simple and effective.
               </p>
-              <div className="d-flex gap-4">
+              <div className="d-flex flex-wrap gap-3 gap-md-4 px-3 px-md-0">
                 <div>
                   <h3 className="display-6 fw-bold text-primary mb-0">1000+</h3>
-                  <p className="text-muted">Issues Resolved</p>
+                  <p className="text-muted small">Issues Resolved</p>
                 </div>
                 <div>
                   <h3 className="display-6 fw-bold text-primary mb-0">500+</h3>
-                  <p className="text-muted">Active Citizens</p>
+                  <p className="text-muted small">Active Citizens</p>
                 </div>
                 <div>
                   <h3 className="display-6 fw-bold text-primary mb-0">50+</h3>
-                  <p className="text-muted">Communities</p>
+                  <p className="text-muted small">Communities</p>
                 </div>
               </div>
             </Col>
             <Col lg={6} data-aos="zoom-in">
               <div
-                className="rounded-4 shadow-lg"
+                className="rounded-4 shadow-lg about-image-container"
                 style={{
-                  height: '400px',
                   background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center'
                 }}
               >
-                <div className="text-center text-white p-5">
-                  <i className="bi bi-people display-1 mb-3"></i>
-                  <h3 className="fw-bold">Building Better Communities Together</h3>
+                <div className="text-center text-white p-3 p-md-5">
+                  <i className="bi bi-people display-4 display-md-1 mb-2 mb-md-3"></i>
+                  <h3 className="fw-bold fs-5 fs-md-3">Building Better Communities Together</h3>
                 </div>
               </div>
             </Col>
@@ -391,10 +386,10 @@ const Home = () => {
       <section className="testimonials py-5" data-aos="fade-up">
         <Container>
           <div className="text-center mb-5">
-            <h2 className="display-5 fw-bold mb-3" style={{ color: 'var(--primary-text)' }}>
+            <h2 className="display-6 display-md-5 fw-bold mb-3 px-3" style={{ color: 'var(--primary-text)' }}>
               Community Voices
             </h2>
-            <p className="lead text-muted">
+            <p className="lead text-muted px-3">
               Hear what our users have to say about JanDrishti
             </p>
           </div>

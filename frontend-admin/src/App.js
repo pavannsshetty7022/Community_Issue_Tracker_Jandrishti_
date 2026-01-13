@@ -8,8 +8,12 @@ import 'aos/dist/aos.css';
 import AdminLogin from './pages/Admin/AdminLogin';
 import AdminDashboard from './pages/Admin/AdminDashboard';
 import IssueDetails from './pages/Admin/IssueDetails';
+import Settings from './pages/Admin/Settings';
+import Insights from './pages/Admin/Insights';
 import { Spinner } from 'react-bootstrap';
 import useDocumentTitle from './utils/useDocumentTitle';
+import 'bootstrap-icons/font/bootstrap-icons.css';
+import './modern-dashboard.css';
 
 
 const AdminPrivateRoute = ({ children }) => {
@@ -51,7 +55,16 @@ const AppContent = () => {
           <IssueDetails />
         </AdminPrivateRoute>
       } />
-      { }
+      <Route path="/dashboard/settings" element={
+        <AdminPrivateRoute>
+          <Settings />
+        </AdminPrivateRoute>
+      } />
+      <Route path="/dashboard/insights" element={
+        <AdminPrivateRoute>
+          <Insights />
+        </AdminPrivateRoute>
+      } />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

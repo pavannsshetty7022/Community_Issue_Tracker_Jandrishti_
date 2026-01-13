@@ -80,6 +80,32 @@ pool.getConnection()
       }
     }
 
+    try {
+      console.log('Ensuring issues table has latitude and longitude columns...');
+      await pool.execute(`
+          ALTER TABLE issues 
+          ADD COLUMN IF NOT EXISTS latitude DECIMAL(10, 8),
+          ADD COLUMN IF NOT EXISTS longitude DECIMAL(11, 8)
+        `);
+      console.log('Issues table schema updated');
+    } catch (error) {
+      if (error.code === 'ER_PARSE_ERROR' || error.code === 'ER_BAD_TABLE_ERROR') {
+        try {
+          const [columns] = await pool.execute('SHOW COLUMNS FROM issues LIKE "latitude"');
+          if (columns.length === 0) {
+            await pool.execute('ALTER TABLE issues ADD COLUMN latitude DECIMAL(10, 8), ADD COLUMN longitude DECIMAL(11, 8)');
+            console.log('Issues table schema updated (fallback)');
+          }
+        } catch (innerError) {
+          console.error('Failed to update issues schema:', innerError.message);
+        }
+      } else if (error.code === 'ER_DUP_COLUMNNAME') {
+        console.log('Latitude/Longitude columns already exist');
+      } else {
+        console.error('Error updating issues schema:', error.message);
+      }
+    }
+
     connection.release();
   })
   .catch(err => {
@@ -364,7 +390,7 @@ app.get('/api/auth/profile', authenticateToken, async (req, res) => {
 
 
 app.post('/api/issues', authenticateToken, upload.array('media', 10), async (req, res) => {
-  const { title, description, location, dateOfOccurrence } = req.body;
+  const { title, description, location, dateOfOccurrence, latitude, longitude } = req.body;
   const userId = req.user.id;
   const mediaPaths = req.files && req.files.length > 0 ? JSON.stringify(req.files.map(file => `/uploads/${file.filename}`)) : '[]';
   const issueId = `JDR-${new Date().toISOString().slice(0, 10).replace(/-/g, '')}-${Math.random().toString(36).substr(2, 4).toUpperCase()}`;
@@ -375,8 +401,8 @@ app.post('/api/issues', authenticateToken, upload.array('media', 10), async (req
 
   try {
     const [result] = await pool.execute(
-      'INSERT INTO issues (issue_id, user_id, title, description, location, date_of_occurrence, media_paths, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())',
-      [issueId, userId, title, description, location, dateOfOccurrence, mediaPaths, 'OPEN']
+      'INSERT INTO issues (issue_id, user_id, title, description, location, latitude, longitude, date_of_occurrence, media_paths, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())',
+      [issueId, userId, title, description, location, latitude || null, longitude || null, dateOfOccurrence, mediaPaths, 'OPEN']
     );
 
     const [newIssueRows] = await pool.execute(`
@@ -457,7 +483,7 @@ app.get('/api/issues/search/:issueId', authenticateToken, async (req, res) => {
 app.put('/api/issues/:id', authenticateToken, upload.fields([{ name: 'newMedia', maxCount: 10 }, { name: 'existingMedia', maxCount: 20 }]), async (req, res) => {
   const issueDbId = req.params.id;
   const userId = req.user.id;
-  const { title, description, location, dateOfOccurrence } = req.body;
+  const { title, description, location, dateOfOccurrence, latitude, longitude } = req.body;
 
   let existingMediaPaths = [];
   if (req.body.existingMedia) {
@@ -515,8 +541,8 @@ app.put('/api/issues/:id', authenticateToken, upload.fields([{ name: 'newMedia',
     }
 
     await pool.execute(
-      'UPDATE issues SET title = ?, description = ?, location = ?, date_of_occurrence = ?, media_paths = ? WHERE id = ?',
-      [title, description, location, dateOfOccurrence, allMediaPaths, issueDbId]
+      'UPDATE issues SET title = ?, description = ?, location = ?, latitude = ?, longitude = ?, date_of_occurrence = ?, media_paths = ? WHERE id = ?',
+      [title, description, location, latitude || null, longitude || null, dateOfOccurrence, allMediaPaths, issueDbId]
     );
     res.json({ message: 'Issue updated successfully' });
   } catch (error) {

@@ -28,11 +28,11 @@ const AdminNavbar = () => {
       className="shadow-sm py-3"
       style={{ borderBottom: isDarkMode ? '1px solid #333' : '1px solid #eee' }}
     >
-      <Container>
+      <Container className="px-3 px-md-4">
         {/* Left: Logo + App Name */}
         <LinkContainer to="/dashboard">
           <Navbar.Brand className="d-flex align-items-center">
-            <Logo />
+            <Logo fontSize="1.5rem" />
             <span className="ms-2 fw-bold text-primary h5 mb-0"></span>
           </Navbar.Brand>
         </LinkContainer>
@@ -47,7 +47,7 @@ const AdminNavbar = () => {
         <Navbar.Toggle aria-controls="admin-navbar-nav" />
 
         <Navbar.Collapse id="admin-navbar-nav">
-          <Nav className="ms-auto align-items-center gap-3">
+          <Nav className="ms-auto align-items-center gap-2 gap-md-3 flex-wrap justify-content-center">
             {/* Right: Controls */}
             <Button
               variant={isDarkMode ? 'outline-light' : 'outline-dark'}
@@ -60,7 +60,7 @@ const AdminNavbar = () => {
             </Button>
 
             {admin && (
-              <div className="d-flex align-items-center me-3 border-end pe-3">
+              <div className="d-flex align-items-center me-0 me-md-3 border-end pe-0 pe-md-3">
                 <div className="text-end me-2 d-none d-md-block">
                   <small className="d-block text-muted" style={{ fontSize: '0.7rem' }}>Logged in as</small>
                   <span className="fw-bold small text-primary">{admin.username || 'Admin'}</span>
@@ -74,12 +74,12 @@ const AdminNavbar = () => {
             {admin ? (
               <Button
                 variant="danger"
-                className="px-4 fw-bold rounded-pill shadow-sm d-flex align-items-center"
-                style={{ height: '46px' }}
+                className="px-3 px-md-4 fw-bold rounded-pill shadow-sm d-flex align-items-center"
+                style={{ height: '46px', fontSize: '0.9rem' }}
                 onClick={logoutAdmin}
               >
-                <i className="bi bi-box-arrow-right me-2"></i>
-                Logout
+                <i className="bi bi-box-arrow-right me-1 me-md-2"></i>
+                <span className="d-none d-sm-inline">Logout</span>
               </Button>
             ) : (
               <LinkContainer to="/login">

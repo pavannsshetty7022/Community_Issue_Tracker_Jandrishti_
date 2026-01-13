@@ -34,10 +34,10 @@ const NavigationBar = () => {
       sticky="top"
       className={`py-3 shadow-sm ${isDarkMode ? 'border-bottom border-secondary' : 'border-bottom'}`}
     >
-      <Container className="px-lg-5">
+      <Container className="px-3 px-md-4 px-lg-5">
         <LinkContainer to="/home">
           <Navbar.Brand className="d-flex align-items-center ps-0">
-            <Logo />
+            <Logo fontSize="1.4rem" />
           </Navbar.Brand>
         </LinkContainer>
 
@@ -76,17 +76,15 @@ const NavigationBar = () => {
             )}
           </Nav>
 
-          <Nav className="ms-auto align-items-center gap-3">
-            {/* Dark Mode Button */}
-            <Button
-              variant={isDarkMode ? 'outline-light' : 'outline-dark'}
+          <Nav className="ms-auto align-items-center gap-2 gap-md-3 flex-wrap justify-content-center">
+            {/* Dark Mode Toggle - Standardized with Admin */}
+            <button
+              className="action-btn"
               onClick={toggleTheme}
-              className="rounded-circle d-flex align-items-center justify-content-center shadow-sm"
-              style={circleButtonStyle}
               title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
             >
-              <i className={`bi ${isDarkMode ? 'bi-sun-fill' : 'bi-moon-stars-fill'} fs-5`} />
-            </Button>
+              <i className={`bi ${isDarkMode ? 'bi-sun-fill' : 'bi-moon-fill'}`}></i>
+            </button>
 
             {user ? (
               <>
@@ -109,12 +107,12 @@ const NavigationBar = () => {
                 {/* Logout */}
                 <Button
                   variant="danger"
-                  className="px-4 fw-bold rounded-pill shadow-sm d-flex align-items-center"
-                  style={{ height: '46px' }}
+                  className="px-3 px-md-4 fw-bold rounded-pill shadow-sm d-flex align-items-center"
+                  style={{ height: '46px', fontSize: '0.9rem' }}
                   onClick={logout}
                 >
-                  <i className="bi bi-box-arrow-right me-2"></i>
-                  Logout
+                  <i className="bi bi-box-arrow-right me-1 me-md-2"></i>
+                  <span className="d-none d-sm-inline">Logout</span>
                 </Button>
               </>
             ) : (
@@ -122,8 +120,8 @@ const NavigationBar = () => {
                 <LinkContainer to="/login">
                   <Button
                     variant="outline-primary"
-                    className="fw-bold px-4 rounded-pill"
-                    style={{ height: '46px' }}
+                    className="fw-bold px-3 px-md-4 rounded-pill"
+                    style={{ height: '46px', fontSize: '0.9rem' }}
                   >
                     Login
                   </Button>
@@ -132,8 +130,8 @@ const NavigationBar = () => {
                 <LinkContainer to="/register">
                   <Button
                     variant="primary"
-                    className="fw-bold px-4 rounded-pill shadow-sm"
-                    style={{ height: '46px' }}
+                    className="fw-bold px-3 px-md-4 rounded-pill shadow-sm"
+                    style={{ height: '46px', fontSize: '0.9rem' }}
                   >
                     Register
                   </Button>

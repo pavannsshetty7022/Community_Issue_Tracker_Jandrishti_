@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Button, Form, Spinner } from 'react-bootstra
 import IssueService from '../../services/issue.service';
 import { useAuth } from '../../context/AuthContext';
 import BackButton from '../../components/BackButton';
+import LocationPicker from '../../components/LocationPicker';
 import toast from 'react-hot-toast';
 
 const issueOptions = [
@@ -29,6 +30,8 @@ const ReportIssue = () => {
   const [customTitle, setCustomTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
+  const [latitude, setLatitude] = useState(null);
+  const [longitude, setLongitude] = useState(null);
   const [dateOfOccurrence, setDateOfOccurrence] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
   const [previewMedia, setPreviewMedia] = useState([]);
@@ -57,6 +60,8 @@ const ReportIssue = () => {
             }
             setDescription(issueToEdit.description);
             setLocation(issueToEdit.location);
+            setLatitude(issueToEdit.latitude);
+            setLongitude(issueToEdit.longitude);
             setDateOfOccurrence(issueToEdit.date_of_occurrence.split('T')[0]);
 
             const mediaPaths = Array.isArray(issueToEdit.media_paths)
@@ -146,6 +151,8 @@ const ReportIssue = () => {
       title: finalTitle,
       description,
       location,
+      latitude,
+      longitude,
       dateOfOccurrence,
     };
 
@@ -224,7 +231,7 @@ const ReportIssue = () => {
         `}
       </style>
 
-      <Container className="flex-grow-1 py-4" style={{
+      <Container className="flex-grow-1 py-4 px-3 px-md-4" style={{
         zIndex: 1,
         opacity: animateContent ? 1 : 0,
         transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
@@ -238,7 +245,7 @@ const ReportIssue = () => {
               backgroundColor: 'var(--card-color)',
               borderRadius: '16px'
             }}>
-              <Card.Body className="p-4 p-md-5">
+              <Card.Body className="p-3 p-md-4 p-lg-5">
                 <div className="text-center mb-4">
                   <i className="bi bi-flag-fill display-4 text-primary mb-3"></i>
                   <h2 className="fw-bold text-primary">
@@ -298,15 +305,27 @@ const ReportIssue = () => {
                     />
                   </Form.Group>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Manual Location</Form.Label>
+                  <Form.Group className="mb-4">
+                    <Form.Label className="fw-bold">Issue Location</Form.Label>
+                    <LocationPicker
+                      value={{ lat: latitude, lng: longitude, address: location }}
+                      onChange={(val) => {
+                        setLocation(val.address);
+                        setLatitude(val.lat);
+                        setLongitude(val.lng);
+                      }}
+                      isEditing={isEditing}
+                    />
                     <Form.Control
                       type="text"
                       id="location"
-                      placeholder="Enter the location of the issue"
+                      placeholder="Selected address will appear here"
                       value={location}
-                      onChange={(e) => setLocation(e.target.value)}
+                      readOnly
+                      disabled
                       required
+                      className="bg-light border-0 small mt-2"
+                      style={{ fontSize: '0.85rem' }}
                     />
                   </Form.Group>
 
@@ -345,11 +364,9 @@ const ReportIssue = () => {
                     </div>
 
                     {previewMedia.length > 0 && (
-                      <div className="d-flex flex-wrap gap-3 mt-3">
+                      <div className="d-flex flex-wrap gap-2 gap-md-3 mt-3">
                         {previewMedia.map((media, index) => (
-                          <div key={media.url} className="position-relative" style={{
-                            width: '150px',
-                            height: '150px',
+                          <div key={media.url} className="position-relative media-preview-item" style={{
                             border: '1px solid #ddd',
                             borderRadius: '8px',
                             overflow: 'hidden',

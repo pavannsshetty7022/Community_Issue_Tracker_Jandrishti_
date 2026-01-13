@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert, Spinner, InputGroup } from 'react-bootstrap';
+import { Container, Row, Col, Card, Form, Button, Alert, Spinner } from 'react-bootstrap';
 import AdminService from '../../services/admin.service';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { useTheme } from '../../context/ThemeContext';
+import Logo from '../../components/Logo';
 
 const AdminLogin = () => {
   const [username, setUsername] = useState('');
@@ -10,31 +11,16 @@ const AdminLogin = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState('error');
   const [loading, setLoading] = useState(false);
-  const [isSuccessLoading, setIsSuccessLoading] = useState(false); // New state for success animation
+  const [isSuccessLoading, setIsSuccessLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { loginAdmin } = useAdminAuth();
-  const { isDarkMode } = useTheme();
-  const [animateContent, setAnimateContent] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   useEffect(() => {
-    setUsername('');
-    setPassword('');
     setMessage('');
-    setMessageType('error');
     setLoading(false);
     setIsSuccessLoading(false);
-    setShowPassword(false);
-    setAnimateContent(true);
-
-    return () => {
-      // Cleanup
-      setIsSuccessLoading(false);
-    };
   }, []);
-
-  const handleClickShowPassword = () => {
-    setShowPassword((prev) => !prev);
-  };
 
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -44,173 +30,141 @@ const AdminLogin = () => {
 
     try {
       const data = await AdminService.login(username, password);
-
-      // Stop form loading, start success loading
       setLoading(false);
       setIsSuccessLoading(true);
-
-      // Wait 2 seconds before redirecting
       setTimeout(() => {
         loginAdmin(data);
-      }, 2000);
-
+      }, 1500);
     } catch (error) {
       console.error('Admin login error:', error);
-      let errorMsg = 'Something went wrong during admin login.';
-      if (error && typeof error === 'object') {
-        if (error.message) errorMsg = error.message;
-        else if (typeof error === 'string') errorMsg = error;
-      } else if (typeof error === 'string') {
-        errorMsg = error;
-      }
-      setMessage(errorMsg);
+      setMessage(error.message || 'Invalid credentials or server error.');
       setMessageType('error');
-      setLoading(false); // Only stop loading on error, keep true on success until transition
+      setLoading(false);
     }
   };
 
   if (isSuccessLoading) {
     return (
-      <div className="min-vh-100 d-flex flex-column align-items-center justify-content-center" style={{
-        background: isDarkMode ? '#121417' : '#f8fafc',
-        transition: 'background-color 0.3s ease'
-      }}>
-        <Spinner animation="grow" variant="primary" style={{ width: '3rem', height: '3rem' }} />
-        <h5 className={`mt-4 fw-bold ${isDarkMode ? 'text-white' : 'text-dark'}`}>Loading reported issues...</h5>
-        <p className="text-muted small">Accessing Admin Dashboard</p>
+      <div className="login-wrapper d-flex flex-column align-items-center justify-content-center">
+        <div className="custom-spinner mb-4"></div>
+        <h4 className="fw-bold">Initializing Session...</h4>
+        <p className="text-muted">Redirecting to Admin Dashboard</p>
       </div>
     );
   }
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{
-      background: 'linear-gradient(135deg, var(--background-color) 0%, #f0f4f8 100%)',
-      position: 'relative',
-      overflow: 'hidden'
-    }}>
-      <div style={{
-        position: 'absolute',
-        top: '-100px',
-        left: '-100px',
-        width: '300px',
-        height: '300px',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(30, 58, 138, 0.1) 0%, rgba(248, 250, 252, 0.8) 80%)',
-        zIndex: 0,
-        filter: 'blur(30px)',
-        animation: 'float 8s ease-in-out infinite'
-      }} />
-      <div style={{
-        position: 'absolute',
-        bottom: '-120px',
-        right: '-120px',
-        width: '350px',
-        height: '350px',
-        borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(249, 115, 22, 0.1) 0%, rgba(248, 250, 252, 0.8) 80%)',
-        zIndex: 0,
-        filter: 'blur(40px)',
-        animation: 'float2 10s ease-in-out infinite'
-      }} />
-
-      <style>
-        {`
-          @keyframes float {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(40px); }
-            100% { transform: translateY(0); }
-          }
-          @keyframes float2 {
-            0% { transform: translateY(0); }
-            50% { transform: translateY(-30px); }
-            100% { transform: translateY(0); }
-          }
-        `}
-      </style>
+    <div className="login-wrapper">
+      <div className="position-absolute top-0 end-0 p-4">
+        <button className="action-btn" onClick={toggleTheme}>
+          <i className={`bi ${isDarkMode ? 'bi-sun-fill' : 'bi-moon-fill'}`}></i>
+        </button>
+      </div>
 
       <Container>
         <Row className="justify-content-center">
-          <Col xs={12} md={6} lg={4}>
-            <Card className="shadow-lg border-0" style={{
-              backgroundColor: 'var(--card-color)',
-              zIndex: 1,
-              opacity: animateContent ? 1 : 0,
-              transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
-              transition: 'opacity 1s ease-out, transform 1s ease-out'
-            }}>
-              <Card.Body className="p-4">
-                <div className="text-center mb-4">
-                  <i className="bi bi-shield-lock display-4 text-primary mb-3"></i>
-                  <h2 className="fw-bold text-primary">Admin Login</h2>
-                  <p className="text-muted">Access the administrative dashboard</p>
-                </div>
+          <Col xs={12} md={5} lg={4}>
+            <div className="text-center mb-5" data-aos="fade-down">
+              <Logo fontSize="3.5rem" className="mb-4 justify-content-center" />
+              <p className="text-muted fw-bold text-uppercase small tracking-widest">Government Issue Management Portal</p>
+            </div>
 
-                <Form onSubmit={handleLogin} autoComplete="off">
+            <Card className="settings-card shadow-lg p-3" data-aos="zoom-in" data-aos-delay="100">
+              <Card.Body>
+                <Form onSubmit={handleLogin}>
                   {message && (
-                    <Alert variant={messageType === 'error' ? 'danger' : 'success'} className="mb-3">
+                    <Alert variant={messageType === 'error' ? 'danger' : 'success'} className="border-0 shadow-sm mb-4 small py-2">
                       {message}
                     </Alert>
                   )}
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Admin Username</Form.Label>
-                    <Form.Control
+                  <div className="form-group mb-4">
+                    <label className="form-label">Username</label>
+                    <input
                       type="text"
-                      id="adminUsername"
-                      placeholder="Enter admin username"
+                      className="form-control"
+                      placeholder="Enter admin ID"
                       value={username}
                       onChange={(e) => setUsername(e.target.value)}
                       required
                       autoFocus
                     />
-                  </Form.Group>
+                  </div>
 
-                  <Form.Group className="mb-3">
-                    <Form.Label>Password</Form.Label>
-                    <InputGroup>
-                      <Form.Control
-                        type={showPassword ? 'text' : 'password'}
-                        id="adminPassword"
-                        placeholder="Enter password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                      />
-                      <Button
-                        variant="outline-secondary"
-                        onClick={handleClickShowPassword}
-                        aria-label="Toggle password visibility"
+                  <div className="form-group mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-1">
+                      <label className="form-label mb-0">Password</label>
+                      <button
+                        type="button"
+                        className="btn btn-link p-0 text-decoration-none small text-primary"
+                        onClick={() => setShowPassword(!showPassword)}
                       >
-                        <i className={`bi ${showPassword ? 'bi-eye-slash' : 'bi-eye'}`}></i>
-                      </Button>
-                    </InputGroup>
-                  </Form.Group>
+                        {showPassword ? 'Hide' : 'Show'}
+                      </button>
+                    </div>
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      className="form-control"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                    />
+                  </div>
 
                   <Button
                     type="submit"
                     variant="primary"
-                    size="lg"
-                    className="w-100 fw-bold"
+                    className="w-100 py-3 fw-bold mt-2"
                     disabled={loading}
                   >
                     {loading ? (
-                      <>
-                        <Spinner animation="border" size="sm" className="me-2" />
-                        Logging in...
-                      </>
+                      <Spinner animation="border" size="sm" />
                     ) : (
-                      <>
-                        <i className="bi bi-box-arrow-in-right me-2"></i>
-                        Login as Admin
-                      </>
+                      'Secure Sign In'
                     )}
                   </Button>
+
+                  <div className="mt-4 text-center">
+                    <p className="text-muted" style={{ fontSize: '0.7rem', letterSpacing: '0.05em' }}>
+                      <i className="bi bi-shield-check me-1"></i>
+                      OFFICIAL GOVERNMENT ACCESS ONLY
+                    </p>
+                  </div>
                 </Form>
               </Card.Body>
             </Card>
           </Col>
         </Row>
       </Container>
+
+      <style>
+        {`
+          .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--bg-color);
+            position: relative;
+            transition: var(--transition);
+          }
+          .custom-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--primary-light);
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+          }
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+          .scale-150 { transform: scale(1.5); }
+          .tracking-widest { letter-spacing: 0.1em; }
+        `}
+      </style>
     </div>
   );
 };

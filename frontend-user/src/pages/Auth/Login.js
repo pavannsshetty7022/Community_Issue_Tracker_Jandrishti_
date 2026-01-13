@@ -86,9 +86,9 @@ const Login = () => {
         `}
       </style>
 
-      <Container className="flex-grow-1 d-flex align-items-center justify-content-center py-5">
+      <Container className="flex-grow-1 d-flex align-items-center justify-content-center py-5 px-3 px-md-4">
         <Row className="justify-content-center w-100">
-          <Col xs={12} md={6} lg={4}>
+          <Col xs={12} sm={10} md={6} lg={4}>
             <Card className="shadow-lg border-0" style={{
               backgroundColor: 'var(--card-color)',
               zIndex: 1,
@@ -96,7 +96,7 @@ const Login = () => {
               transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
               transition: 'opacity 1s ease-out, transform 1s ease-out'
             }}>
-              <Card.Body className="p-4">
+              <Card.Body className="p-4 p-md-5">
                 <div className="text-center mb-4">
                   <i className="bi bi-person-circle display-4 text-primary mb-3"></i>
                   <h2 className="fw-bold text-primary">Login to JanDrishti JD</h2>

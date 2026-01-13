@@ -23,7 +23,6 @@ const Profile = () => {
                 }
                 const data = await AuthService.getProfile(user.token);
                 setProfile(data);
-                // Sync data to AuthContext so Navbar can see the full name
                 updateUserData({ full_name: data.full_name });
             } catch (err) {
                 console.error('Failed to fetch profile:', err);

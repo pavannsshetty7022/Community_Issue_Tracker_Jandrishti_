@@ -86,15 +86,15 @@ const Register = () => {
       <div style={{ position: 'absolute', top: '-10%">', left: '-10%', width: '400px', height: '400px', borderRadius: '50%', background: 'rgba(30, 58, 138, 0.05)', filter: 'blur(80px)', zIndex: 0 }} />
       <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'rgba(249, 115, 22, 0.05)', filter: 'blur(100px)', zIndex: 0 }} />
 
-      <Container className="position-relative" style={{ zIndex: 1 }}>
+      <Container className="position-relative px-3 px-md-4" style={{ zIndex: 1 }}>
         <Row className="justify-content-center">
           <Col xs={12} lg={8}>
             <Card className="shadow-lg border-0 rounded-4 overflow-hidden">
               <Row className="g-0">
-                <Col md={12} className="p-4 p-md-5">
-                  <div className="text-center mb-5">
-                    <h1 className="display-5 fw-bold text-primary mb-2">Join Jan Drishti JD</h1>
-                    <p className="text-muted fs-5">Empower your community in one simple step</p>
+                <Col md={12} className="p-3 p-md-4 p-lg-5">
+                  <div className="text-center mb-4 mb-md-5">
+                    <h1 className="display-6 display-md-5 fw-bold text-primary mb-2">Join Jan Drishti JD</h1>
+                    <p className="text-muted fs-6 fs-md-5">Empower your community in one simple step</p>
                   </div>
 
                   <Form onSubmit={handleRegister}>
@@ -118,7 +118,7 @@ const Register = () => {
                             <Form.Text className="text-muted">This will be your identity for reporting issues.</Form.Text>
                           </Form.Group>
                         </Col>
-                        <Col md={6} className="mb-3">
+                        <Col xs={12} md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">Password</Form.Label>
                             <InputGroup>
@@ -136,7 +136,7 @@ const Register = () => {
                             </InputGroup>
                           </Form.Group>
                         </Col>
-                        <Col md={6} className="mb-3">
+                        <Col xs={12} md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">Confirm Password</Form.Label>
                             <InputGroup>
@@ -163,7 +163,7 @@ const Register = () => {
                         <i className="bi bi-person me-2"></i>Personal Details
                       </h4>
                       <Row>
-                        <Col md={6} className="mb-3">
+                        <Col xs={12} md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">Full Name</Form.Label>
                             <Form.Control
@@ -176,7 +176,7 @@ const Register = () => {
                             />
                           </Form.Group>
                         </Col>
-                        <Col md={6} className="mb-3">
+                        <Col xs={12} md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">User Type</Form.Label>
                             <Form.Select
@@ -216,7 +216,7 @@ const Register = () => {
                         <i className="bi bi-telephone me-2"></i>Contact Details
                       </h4>
                       <Row>
-                        <Col md={6} className="mb-3">
+                        <Col xs={12} md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">Phone Number</Form.Label>
                             <Form.Control
@@ -229,7 +229,7 @@ const Register = () => {
                             />
                           </Form.Group>
                         </Col>
-                        <Col md={6} className="mb-3">
+                        <Col xs={12} md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">Email Address (Optional)</Form.Label>
                             <Form.Control
@@ -250,7 +250,7 @@ const Register = () => {
                         <i className="bi bi-geo-alt me-2"></i>Address / Primary Area
                       </h4>
                       <Row>
-                        <Col md={6} className="mb-3">
+                        <Col xs={12} md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">House / Building No.</Form.Label>
                             <Form.Control
@@ -263,7 +263,7 @@ const Register = () => {
                             />
                           </Form.Group>
                         </Col>
-                        <Col md={6} className="mb-3">
+                        <Col xs={12} md={6} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">Street / Area</Form.Label>
                             <Form.Control
@@ -276,7 +276,7 @@ const Register = () => {
                             />
                           </Form.Group>
                         </Col>
-                        <Col md={4} className="mb-3">
+                        <Col xs={12} sm={6} md={4} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">City</Form.Label>
                             <Form.Control
@@ -289,7 +289,7 @@ const Register = () => {
                             />
                           </Form.Group>
                         </Col>
-                        <Col md={4} className="mb-3">
+                        <Col xs={12} sm={6} md={4} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">State</Form.Label>
                             <Form.Control
@@ -302,7 +302,7 @@ const Register = () => {
                             />
                           </Form.Group>
                         </Col>
-                        <Col md={4} className="mb-3">
+                        <Col xs={12} sm={6} md={4} className="mb-3">
                           <Form.Group>
                             <Form.Label className="fw-semibold">Pincode</Form.Label>
                             <Form.Control

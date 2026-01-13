@@ -166,7 +166,7 @@ const UserDashboard = () => {
         `}
       </style>
 
-      <Container className="flex-grow-1 py-4" style={{
+      <Container className="flex-grow-1 py-4 px-3 px-md-4" style={{
         zIndex: 1,
         opacity: animateContent ? 1 : 0,
         transform: animateContent ? 'translateY(0)' : 'translateY(20px)',
@@ -174,16 +174,16 @@ const UserDashboard = () => {
       }}>
         <BackButton />
 
-        <div className="text-center mb-4 mt-2">
-          <h2 className="display-6 fw-semibold mb-2" style={{ color: 'var(--primary-text)' }}>
+        <div className="text-center mb-4 mt-2 px-3">
+          <h2 className="display-6 fw-semibold mb-2" style={{ color: 'var(--primary-text)', fontSize: '1.75rem' }}>
             Your Reported Issues
           </h2>
-          <p className="text-muted fs-5 mx-auto text-container-md opacity-75">
+          <p className="text-muted fs-6 fs-md-5 mx-auto text-container-md opacity-75">
             Manage your reports, track their resolution progress, and keep updated on community improvements.
           </p>
         </div>
 
-        <div className="mx-auto mb-5" style={{ maxWidth: '600px' }}>
+        <div className="mx-auto mb-5 px-3 px-md-0" style={{ maxWidth: '600px' }}>
           <InputGroup
             className="shadow-sm overflow-hidden"
             style={{
@@ -198,7 +198,7 @@ const UserDashboard = () => {
               transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
             }}
           >
-            <InputGroup.Text className={`${isDarkMode ? 'bg-dark border-0' : 'bg-white border-0'} py-0 ps-3 transition-all`}
+            <InputGroup.Text className={`${isDarkMode ? 'bg-dark border-0' : 'bg-white border-0'} py-0 ps-2 ps-md-3 transition-all`}
               style={{ color: isSearchFocused ? 'var(--primary-color)' : 'var(--text-muted)' }}
             >
               <i className={`bi bi-search fs-6 ${isSearchFocused ? 'scale-110' : ''}`} style={{ transition: 'all 0.3s ease' }}></i>
@@ -212,37 +212,38 @@ const UserDashboard = () => {
               onFocus={() => setIsSearchFocused(true)}
               onBlur={() => setIsSearchFocused(false)}
               className={`${isDarkMode ? 'bg-dark text-light border-0' : 'bg-white border-0'} py-0 px-2 fs-6`}
-              style={{ boxShadow: 'none', height: '40px' }}
+              style={{ boxShadow: 'none', height: '40px', fontSize: '0.9rem' }}
             />
             {searchQuery && (
               <Button
                 variant="link"
                 onClick={() => { setSearchQuery(''); fetchIssues(); }}
-                className="text-decoration-none text-muted px-2 py-0 d-flex align-items-center opacity-75 hover-opacity-100 transition-all"
+                className="text-decoration-none text-muted px-1 px-md-2 py-0 d-flex align-items-center opacity-75 hover-opacity-100 transition-all"
                 title="Clear Search"
-                style={{ height: '40px', fontSize: '0.9rem' }}
+                style={{ height: '40px', fontSize: '0.85rem' }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--primary-color)'; e.currentTarget.style.opacity = '1'; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = ''; e.currentTarget.style.opacity = '0.75'; }}
               >
-                Clear
+                <span className="d-none d-sm-inline">Clear</span>
+                <i className="bi bi-x d-sm-none"></i>
               </Button>
             )}
             <Button
               variant="primary"
               onClick={handleSearch}
-              className="px-3 fw-bold d-flex align-items-center transition-bounce"
+              className="px-2 px-md-3 fw-bold d-flex align-items-center transition-bounce"
               disabled={loading}
               style={{
                 height: '40px',
                 borderTopLeftRadius: '0',
                 borderBottomLeftRadius: '0',
-                fontSize: '0.9rem',
-                zIndex: 2
+                fontSize: '0.85rem'
               }}
               onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; }}
               onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; }}
             >
-              Search
+              <i className="bi bi-search d-sm-none"></i>
+              <span className="d-none d-sm-inline">Search</span>
             </Button>
           </InputGroup>
         </div>
