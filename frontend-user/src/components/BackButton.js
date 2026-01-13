@@ -8,17 +8,14 @@ const BackButton = () => {
     const location = useLocation();
     const { user } = useAuth();
 
-    // Don't show back button on Home page
     if (location.pathname === '/home' || location.pathname === '/') {
         return null;
     }
 
     const handleBack = () => {
-        // Check if there's history to go back to
         if (window.history.length > 1) {
             navigate(-1);
         } else {
-            // Fallback: go to dashboard if logged in, home if not
             navigate(user ? '/dashboard' : '/home');
         }
     };

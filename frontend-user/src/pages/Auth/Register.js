@@ -13,21 +13,17 @@ const userTypes = [
 const Register = () => {
   const { login } = useAuth();
 
-  // Account Information
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Personal Details
   const [fullName, setFullName] = useState('');
   const [userType, setUserType] = useState('');
   const [userTypeCustom, setUserTypeCustom] = useState('');
 
-  // Contact Details
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [email, setEmail] = useState(''); // Optional but recommended
+  const [email, setEmail] = useState('');
 
-  // Address Details
   const [house, setHouse] = useState('');
   const [street, setStreet] = useState('');
   const [city, setCity] = useState('');
@@ -70,7 +66,6 @@ const Register = () => {
       const data = await AuthService.register(registrationData);
       toast.success('Registration successful!');
 
-      // Auto Login
       login(data);
     } catch (error) {
       console.error('Registration error:', error);
@@ -82,7 +77,7 @@ const Register = () => {
 
   return (
     <div className="position-relative overflow-hidden bg-light min-vh-100 py-5">
-      {/* Background Elements */}
+
       <div style={{ position: 'absolute', top: '-10%">', left: '-10%', width: '400px', height: '400px', borderRadius: '50%', background: 'rgba(30, 58, 138, 0.05)', filter: 'blur(80px)', zIndex: 0 }} />
       <div style={{ position: 'absolute', bottom: '-10%', right: '-10%', width: '500px', height: '500px', borderRadius: '50%', background: 'rgba(249, 115, 22, 0.05)', filter: 'blur(100px)', zIndex: 0 }} />
 
@@ -98,7 +93,6 @@ const Register = () => {
                   </div>
 
                   <Form onSubmit={handleRegister}>
-                    {/* Section: Account Information */}
                     <div className="mb-5">
                       <h4 className="border-start border-4 border-primary ps-3 mb-4 fw-bold">
                         <i className="bi bi-shield-lock me-2"></i>Account Information
@@ -157,7 +151,6 @@ const Register = () => {
                       </Row>
                     </div>
 
-                    {/* Section: Personal Details */}
                     <div className="mb-5">
                       <h4 className="border-start border-4 border-primary ps-3 mb-4 fw-bold">
                         <i className="bi bi-person me-2"></i>Personal Details
@@ -210,7 +203,6 @@ const Register = () => {
                       </Row>
                     </div>
 
-                    {/* Section: Contact Details */}
                     <div className="mb-5">
                       <h4 className="border-start border-4 border-primary ps-3 mb-4 fw-bold">
                         <i className="bi bi-telephone me-2"></i>Contact Details
@@ -243,8 +235,6 @@ const Register = () => {
                         </Col>
                       </Row>
                     </div>
-
-                    {/* Section: Address */}
                     <div className="mb-5">
                       <h4 className="border-start border-4 border-primary ps-3 mb-4 fw-bold">
                         <i className="bi bi-geo-alt me-2"></i>Address / Primary Area

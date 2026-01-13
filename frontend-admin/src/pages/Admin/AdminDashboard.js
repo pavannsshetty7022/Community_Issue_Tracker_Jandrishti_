@@ -6,7 +6,7 @@ import AdminService from '../../services/admin.service';
 import { useAdminAuth } from '../../context/AdminAuthContext';
 import { socket } from '../../socket';
 
-// New Components
+
 import Sidebar from '../../components/Sidebar';
 import DashboardHeader from '../../components/DashboardHeader';
 import KpiCard from '../../components/KpiCard';
@@ -23,7 +23,7 @@ const AdminDashboard = () => {
   const [updateMessage, setUpdateMessage] = useState('');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  // Pagination state
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 8;
 
@@ -86,7 +86,7 @@ const AdminDashboard = () => {
     setSearchQuery(query);
   };
 
-  // Pagination Logic
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = issues.slice(indexOfFirstItem, indexOfLastItem);
@@ -118,8 +118,6 @@ const AdminDashboard = () => {
               Refresh Data
             </button>
           </header>
-
-          {/* KPI Cards */}
           <div className="kpi-grid">
             <KpiCard
               title="Open Issues"
@@ -168,11 +166,9 @@ const AdminDashboard = () => {
 
             {updateMessage && <Alert variant="info" className="border-0 shadow-sm mb-4 py-3 small animate__animated animate__fadeIn">{updateMessage}</Alert>}
             {error && <Alert variant="danger" className="border-0 shadow-sm mb-4 py-3 small animate__animated animate__shakeX">{error}</Alert>}
-
-            {/* Issue Grid */}
             <div className="issue-grid">
               {loading && issues.length === 0 ? (
-                // Skeleton Loaders
+
                 [...Array(8)].map((_, i) => <SkeletonLoader key={i} />)
               ) : issues.length === 0 ? (
                 <div className="col-12 text-center py-5 bg-white rounded-lg shadow-sm border">
@@ -186,8 +182,6 @@ const AdminDashboard = () => {
                 ))
               )}
             </div>
-
-            {/* Pagination */}
             {totalPages > 1 && (
               <div className="d-flex justify-content-center mt-5">
                 <Pagination className="modern-pagination">

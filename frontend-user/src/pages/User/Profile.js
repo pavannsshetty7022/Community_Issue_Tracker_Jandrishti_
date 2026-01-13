@@ -50,7 +50,6 @@ const Profile = () => {
 
     return (
         <div className="position-relative overflow-hidden py-5">
-            {/* Background Blobs */}
             <div style={{
                 position: 'absolute',
                 top: '-100px',

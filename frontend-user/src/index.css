@@ -131,7 +131,7 @@ code {
     monospace;
 }
 
-/* Responsive Design Utilities */
+
 @media (max-width: 767.98px) {
   .hero-carousel-item {
     height: 300px !important;
@@ -156,7 +156,7 @@ code {
   }
 }
 
-/* Mobile-friendly button sizes */
+
 @media (max-width: 575.98px) {
   .btn-lg {
     padding: 0.5rem 1rem !important;
@@ -172,7 +172,7 @@ code {
   }
 }
 
-/* Ensure containers don't overflow on mobile */
+
 @media (max-width: 767.98px) {
   .container {
     padding-left: 1rem;

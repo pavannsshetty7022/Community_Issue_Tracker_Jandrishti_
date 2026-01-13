@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css';
 import { Form, ListGroup, Card, Spinner } from 'react-bootstrap';
 import { debounce } from 'lodash';
 
-// Fix Leaflet marker icon issue
+
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
     iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
@@ -48,7 +48,7 @@ const LocationPicker = ({ value, onChange, isEditing = false }) => {
     const [suggestions, setSuggestions] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [position, setPosition] = useState(value?.lat && value?.lng ? [value.lat, value.lng] : null);
-    const [mapCenter, setMapCenter] = useState([20.5937, 78.9629]); // Default center (India)
+    const [mapCenter, setMapCenter] = useState([20.5937, 78.9629]);
     const [zoom, setZoom] = useState(5);
 
     useEffect(() => {
@@ -58,7 +58,7 @@ const LocationPicker = ({ value, onChange, isEditing = false }) => {
             setZoom(15);
             setSearchQuery(value.address || '');
         } else if (!isEditing) {
-            // Try to get current location
+
             navigator.geolocation.getCurrentPosition(
                 (pos) => {
                     const { latitude, longitude } = pos.coords;

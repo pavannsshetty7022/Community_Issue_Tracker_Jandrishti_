@@ -122,7 +122,6 @@ const ProfileUpdate = () => {
 
   return (
     <div className="position-relative overflow-hidden">
-      {/* Animated background elements */}
       <div style={{
         position: 'absolute',
         top: '-100px',

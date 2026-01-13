@@ -29,7 +29,7 @@ const AdminNavbar = () => {
       style={{ borderBottom: isDarkMode ? '1px solid #333' : '1px solid #eee' }}
     >
       <Container className="px-3 px-md-4">
-        {/* Left: Logo + App Name */}
+
         <LinkContainer to="/dashboard">
           <Navbar.Brand className="d-flex align-items-center">
             <Logo fontSize="1.5rem" />
@@ -37,7 +37,6 @@ const AdminNavbar = () => {
           </Navbar.Brand>
         </LinkContainer>
 
-        {/* Center: Dashboard Name (Hidden on mobile) */}
         <div className="d-none d-lg-block position-absolute start-50 translate-middle-x">
           <span className="fw-bold text-muted text-uppercase small tracking-widest">
             Admin Management Portal
@@ -48,7 +47,7 @@ const AdminNavbar = () => {
 
         <Navbar.Collapse id="admin-navbar-nav">
           <Nav className="ms-auto align-items-center gap-2 gap-md-3 flex-wrap justify-content-center">
-            {/* Right: Controls */}
+
             <Button
               variant={isDarkMode ? 'outline-light' : 'outline-dark'}
               onClick={toggleTheme}

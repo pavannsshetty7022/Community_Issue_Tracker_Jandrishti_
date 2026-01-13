@@ -9,7 +9,7 @@
   --danger-color: #ef4444;
   --danger-light: rgba(239, 68, 68, 0.1);
 
-  /* Light Mode Colors */
+  
   --bg-color: #f8fafc;
   --card-bg: #ffffff;
   --sidebar-bg: #ffffff;
@@ -62,7 +62,7 @@ h6 {
   color: var(--text-main);
 }
 
-/* Dashboard Layout */
+
 .dashboard-wrapper {
   display: flex;
   min-height: 100vh;
@@ -93,10 +93,10 @@ h6 {
 
 .dashboard-content {
   padding: 2rem;
-  /* Removed padding-top since header is no longer fixed */
+  
 }
 
-/* Sidebar Styling */
+
 .sidebar {
   width: var(--sidebar-width);
   height: 100vh;
@@ -203,13 +203,13 @@ h6 {
   padding: 0.75rem 0;
 }
 
-/* Header Styling - NOW NON-STICKY */
+
 .dashboard-header {
   height: var(--header-height);
   background: var(--header-bg);
   border-bottom: 1px solid var(--border-color);
   position: relative;
-  /* Changed from fixed */
+  
   width: 100%;
   display: flex;
   align-items: center;
@@ -315,7 +315,7 @@ h6 {
   color: var(--primary-color);
 }
 
-/* KPI Cards with Colored Backgrounds */
+
 .kpi-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -411,7 +411,7 @@ h6 {
   font-weight: 500;
 }
 
-/* Status Tabs */
+
 .status-tabs {
   display: flex;
   gap: 0.5rem;
@@ -441,7 +441,7 @@ h6 {
   color: #ffffff;
 }
 
-/* Issue Cards - Simplified and Uniform */
+
 .issue-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -458,7 +458,7 @@ h6 {
   display: flex;
   flex-direction: column;
   height: 280px;
-  /* Uniform height */
+  
 }
 
 .issue-card:hover {
@@ -551,14 +551,14 @@ h6 {
   filter: brightness(1.1);
 }
 
-/* Skeleton Loader */
+
 .skeleton {
   background: var(--border-color);
   opacity: 0.6;
   border-radius: 4px;
 }
 
-/* Settings Styles */
+
 .settings-card {
   background: var(--card-bg);
   border-radius: var(--radius-lg);
@@ -607,7 +607,7 @@ h6 {
   cursor: not-allowed;
 }
 
-/* Utilities */
+
 .text-primary {
   color: var(--primary-color);
 }

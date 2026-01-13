@@ -21,7 +21,7 @@ const NavigationBar = () => {
     transition: 'all 0.2s ease'
   };
 
-  // Helper function to check if a path is active
+
   const isActive = (path) => {
     return location.pathname === path;
   };
@@ -77,7 +77,7 @@ const NavigationBar = () => {
           </Nav>
 
           <Nav className="ms-auto align-items-center gap-2 gap-md-3 flex-wrap justify-content-center">
-            {/* Dark Mode Toggle - Standardized with Admin */}
+
             <button
               className="action-btn"
               onClick={toggleTheme}
@@ -88,7 +88,7 @@ const NavigationBar = () => {
 
             {user ? (
               <>
-                {/* Profile Avatar */}
+
                 <LinkContainer to="/profile">
                   <Button
                     variant={isDarkMode ? 'outline-light' : 'outline-primary'}
@@ -104,7 +104,6 @@ const NavigationBar = () => {
                   </Button>
                 </LinkContainer>
 
-                {/* Logout */}
                 <Button
                   variant="danger"
                   className="px-3 px-md-4 fw-bold rounded-pill shadow-sm d-flex align-items-center"

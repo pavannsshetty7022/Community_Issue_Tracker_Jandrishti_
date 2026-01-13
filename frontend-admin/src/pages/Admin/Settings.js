@@ -34,7 +34,6 @@ const Settings = () => {
 
                     <Row>
                         <Col lg={8}>
-                            {/* Profile Settings */}
                             <div className="settings-card mb-4" data-aos="fade-up">
                                 <h3 className="settings-section-title">Profile Settings</h3>
                                 <Form onSubmit={handleSave}>
@@ -59,8 +58,6 @@ const Settings = () => {
                                     <Button type="submit" variant="primary" className="px-4">Save Changes</Button>
                                 </Form>
                             </div>
-
-                            {/* System Preferences */}
                             <div className="settings-card mb-4" data-aos="fade-up" data-aos-delay="100">
                                 <h3 className="settings-section-title">Theme & Appearance</h3>
                                 <div className="d-flex align-items-center justify-content-between">
@@ -84,8 +81,6 @@ const Settings = () => {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* Notifications */}
                             <div className="settings-card" data-aos="fade-up" data-aos-delay="200">
                                 <h3 className="settings-section-title">Notifications</h3>
                                 <Form.Check
@@ -106,7 +101,6 @@ const Settings = () => {
                         </Col>
 
                         <Col lg={4}>
-                            {/* Account Info */}
                             <div className="settings-card bg-primary-light border-0 shadow-none mb-4" data-aos="fade-left">
                                 <h3 className="settings-section-title border-primary border-opacity-25 text-primary">System Information</h3>
                                 <div className="user-profile mb-3">

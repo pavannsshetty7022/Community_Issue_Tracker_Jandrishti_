@@ -8,7 +8,7 @@ const BackButton = ({ fallbackPath = '/dashboard', label = 'Back' }) => {
     const location = useLocation();
     const { isDarkMode } = useTheme();
 
-    // Don't show back button on dashboard/home
+
     if (location.pathname === '/dashboard' || location.pathname === '/login') {
         return null;
     }

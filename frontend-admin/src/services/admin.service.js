@@ -34,7 +34,7 @@ const getAllIssues = async (token, statusFilter = '', searchQuery = '') => {
       url += `?${params.toString()}`;
     }
 
-    console.log('Fetching issues from:', url); // Debug log
+    console.log('Fetching issues from:', url);
 
     const response = await fetch(url, {
       method: 'GET',
@@ -48,13 +48,13 @@ const getAllIssues = async (token, statusFilter = '', searchQuery = '') => {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('Server response error:', data); // Debug log
+      console.error('Server response error:', data);
       throw new Error(data.message || 'Failed to fetch all issues');
     }
 
     return data;
   } catch (error) {
-    console.error('Error fetching issues:', error); // Debug log
+    console.error('Error fetching issues:', error);
     throw new Error(error.message || 'Network error while fetching issues');
   }
 };

@@ -38,7 +38,7 @@ code {
     monospace;
 }
 
-/* Responsive Design Utilities */
+
 @media (max-width: 767.98px) {
   .container-fluid {
     padding-left: 1rem;
@@ -56,7 +56,7 @@ code {
   }
 }
 
-/* Ensure proper spacing on mobile */
+
 @media (max-width: 575.98px) {
   .card-body {
     padding: 1rem !important;

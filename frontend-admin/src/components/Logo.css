@@ -24,18 +24,18 @@
 
 .logo-jan {
   color: #1e40af;
-  /* Deep Blue */
+  
 }
 
 .logo-drishti {
   color: #15803d;
-  /* Forest Green */
+  
   margin-right: 0.25em;
 }
 
 .logo-jd-badge {
   background: #f97316;
-  /* Vibrant Orange */
+  
   color: #ffffff;
   padding: 0.1em 0.4em;
   border-radius: 6px;
@@ -48,15 +48,15 @@
   line-height: 1;
 }
 
-/* Theme Adaptations */
+
 [data-bs-theme='dark'] .logo-jan {
   color: #60a5fa;
-  /* Lighter Blue for Dark Mode */
+  
 }
 
 [data-bs-theme='dark'] .logo-drishti {
   color: #4ade80;
-  /* Lighter Green for Dark Mode */
+  
 }
 
 [data-bs-theme='dark'] .logo-jd-badge {

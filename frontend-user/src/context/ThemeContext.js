@@ -19,13 +19,13 @@ export const ThemeProvider = ({ children }) => {
     return window.matchMedia('(prefers-color-scheme: dark)').matches;
   });
 
-  // Apply theme changes to document and localStorage
+
   useEffect(() => {
     const theme = isDarkMode ? 'dark' : 'light';
     document.documentElement.setAttribute('data-bs-theme', theme);
     localStorage.setItem('theme', theme);
     
-    // Also update body class for additional styling if needed
+
     document.body.className = document.body.className.replace(/theme-\w+/, '') + ` theme-${theme}`;
   }, [isDarkMode]);
 

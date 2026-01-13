@@ -100,7 +100,6 @@ const Home = () => {
 
   return (
     <div className="home-page">
-      {/* Hero Carousel Section */}
       <Carousel
         fade
         interval={2000}
@@ -221,8 +220,6 @@ const Home = () => {
           </div>
         </Carousel.Item>
       </Carousel>
-
-      {/* CTA Button Section */}
       <Container className="py-5" data-aos="fade-up">
         <div className="text-center">
           <Button
@@ -243,8 +240,6 @@ const Home = () => {
           </Button>
         </div>
       </Container>
-
-      {/* Issue Categories Section */}
       <section className="issue-categories py-5" style={{ backgroundColor: 'var(--card-color)' }} data-aos="fade-up">
         <Container>
           <div className="text-center mb-5" data-aos="fade-up">
@@ -293,8 +288,6 @@ const Home = () => {
           </Row>
         </Container>
       </section>
-
-      {/* How It Works Section */}
       <section className="how-it-works py-5" data-aos="fade-up">
         <Container>
           <div className="text-center mb-5">
@@ -330,8 +323,6 @@ const Home = () => {
           </Row>
         </Container>
       </section>
-
-      {/* About Us Section */}
       <section className="about-us py-5" style={{ backgroundColor: 'var(--card-color)' }} data-aos="fade-up">
         <Container>
           <Row className="align-items-center g-5">
